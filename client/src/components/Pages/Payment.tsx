@@ -443,14 +443,20 @@ const Payment = () => {
                     //console.log("invoked redirecturl" + redirectUrl);
                     if(transResponse){
                     console.log('transid--------if----------------->' + transResponse);
-                    updatePaymentLinkRecord();
-                    var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                     updatePaymentLinkRecord();
+                    // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                    // console.log("redirecturl-->"+redirectUrl);
+                    // navigateTo(redirectUrl);
+                    }
+                  var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
                     console.log("redirecturl-->"+redirectUrl);
                     navigateTo(redirectUrl);
-                    }
+                    
                 }
                 console.log(" create  transaction-->" + JSON.stringify(response));
-                //this.navigateTo(redirectUrl);
+              var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + response;
+                    console.log("redirecturl-->"+redirectUrl);
+                    navigateTo(redirectUrl);
             })
             .catch((err) => {
                 setIsLoader(false);
@@ -464,7 +470,7 @@ const Payment = () => {
       }
 
     const updatePaymentLinkRecord = () => {
-        console.log("Invoked Update PayLink");
+        console.log("Invoked Update PayLink"+transResponse);
         //var transId = settransIdUrl;
         if (transResponse) {
             var payLinkRcdParamsWithId = {
