@@ -444,9 +444,9 @@ const Payment = () => {
                     if(transResponse){
                     console.log('transid--------if----------------->' + transResponse);
                     updatePaymentLinkRecord();
-                    // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
-                    // console.log("redirecturl-->"+redirectUrl);
-                    // navigateTo(redirectUrl);
+                    var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                    console.log("redirecturl-->"+redirectUrl);
+                    navigateTo(redirectUrl);
                     }
                 }
                 console.log(" create  transaction-->" + JSON.stringify(response));
@@ -501,9 +501,9 @@ const Payment = () => {
             .then((response) => response.json())
             .then((response) => {
                 console.log(" update  payLink-->" + JSON.stringify(response));
-                var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
-                console.log("redirecturl-->"+redirectUrl);
-                navigateTo(redirectUrl);
+                // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                // console.log("redirecturl-->"+redirectUrl);
+                // navigateTo(redirectUrl);
             })
             .catch((err) => {
                 console.log("err" + err);
