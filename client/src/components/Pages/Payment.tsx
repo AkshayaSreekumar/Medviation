@@ -72,7 +72,6 @@ const Payment = () => {
 
     const radios = [
         { name: 'Card', value: 'card' },
-        { name: 'ACH', value: 'ach' },
     ];
     const [selectedPaymentOption, setSelectedPaymentOption] = useState('default');
     console.log(selectedPaymentOption);
@@ -85,7 +84,7 @@ const Payment = () => {
             createRandomKey();
         }
         getPaymentLinkDetails();
-        getFieldsetData();
+        //getFieldsetData();
         if (apicustomerId && dueAmount && orderTotal) {
             setIsLoader(false);
         }
@@ -102,7 +101,7 @@ const Payment = () => {
             }
         }
         if (cardType && payableAmount) {
-            let charge = '2';
+            let charge = '3';
             let chargeAmd = (parseInt(charge) / 100) * parseInt(payableAmount)
             setChargeAmount(JSON.stringify(chargeAmd))
             setTotalAmount(JSON.stringify(parseInt(payableAmount) + chargeAmd));
@@ -209,6 +208,7 @@ const Payment = () => {
                 //     setDueAmount(y[0].AmountDue__c);
                 // }
                 getOrderDetails(urlOrderId, baseUrl);
+                getFieldsetData();
                 //getStripeKey();
             })
             .catch((err) => {
@@ -217,7 +217,7 @@ const Payment = () => {
     }
    
     const getFieldsetData = () => {
-        console.log("Invoked getFieldsetData");
+        console.log("Invoked getFieldsetData"+urlPaymentLinkId);
         var ipParams = { inputId: urlPaymentLinkId };
         // var ipParams = {};
         // ipParams.inputId = this.urlOrderId;
@@ -444,8 +444,9 @@ const Payment = () => {
                     if(transResponse){
                     console.log('transid--------if----------------->' + transResponse);
                     updatePaymentLinkRecord();
-                    var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
-                    navigateTo(redirectUrl);
+                    // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                    // console.log("redirecturl-->"+redirectUrl);
+                    // navigateTo(redirectUrl);
                     }
                 }
                 console.log(" create  transaction-->" + JSON.stringify(response));
@@ -500,9 +501,9 @@ const Payment = () => {
             .then((response) => response.json())
             .then((response) => {
                 console.log(" update  payLink-->" + JSON.stringify(response));
-                // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + this.transId;
-                //   //var redirectUrl = response.charges.data[0].receipt_url;
-                //   this.navigateTo(redirectUrl);
+                var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                console.log("redirecturl-->"+redirectUrl);
+                navigateTo(redirectUrl);
             })
             .catch((err) => {
                 console.log("err" + err);
