@@ -123,7 +123,12 @@ const Payment = () => {
         //localStorage.setItem('RandomKey', this.idempotencyKey);
     }
     const getPaymentLinkDetails = () => {
-        let baseUrl = "https://crma-pay-developer-edition.na163.force.com/";
+        //-------------- InterACTPay Dev-----------------//
+        //let baseUrl = "https://crma-pay-developer-edition.na163.force.com/";
+        //-------- Medviation Dev  ------//
+        let baseUrl="https://crmapay-developer-edition.na213.force.com/";
+
+
         setBaseUrl(baseUrl);
         var payLinkParams = { paymentLinkId: urlPaymentLinkId };
         var url = baseUrl + "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
@@ -234,11 +239,11 @@ const Payment = () => {
             console.log("getFieldsetData-->y------>"+response);
             var Reponse = JSON.parse(response);
             console.log("Reponse" + JSON.stringify(Reponse));
-            console.log("Reponse#########"+Reponse[0].vlocity_cmt__EffectiveOrderTotal__c);
+            console.log("Reponse#########"+Reponse[0].Amount_Due__c);
             // this.dueAmount = Reponse[0].vlocity_cmt__EffectiveOrderTotal__c;
             // this.setState({ dueAmount: this.dueAmount });
             // console.log("#########"+this.state.dueAmount);
-             var dueAmount = Reponse[0].crma_pay__Amount_Due__c;
+             var dueAmount = Reponse[0].Amount_Due__c;
             setDueAmount(dueAmount);
           })
           .catch((err) => {
@@ -338,7 +343,7 @@ const Payment = () => {
             method: "POST",
             headers: {
                 "x-rapidapi-host": "https://api.stripe.com",
-                Authorization: " Bearer sk_test_51K9PF1JZdmpiz6ZwomLVnx7eXnu0Buv19EwOe262mK5uj5E4bTpWO1trTF5S1OvVmdnpWtd2fm8s0HHbMlrqY2uZ00lWc3uV7c",
+                Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
                 "Idempotency-Key": idempotencyKey,
             },
         })
@@ -438,7 +443,9 @@ const Payment = () => {
                     //console.log("invoked redirecturl" + redirectUrl);
                     if(transResponse){
                     console.log('transid--------if----------------->' + transResponse);
-                    //updatePaymentLinkRecord();
+                    updatePaymentLinkRecord();
+                    var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                    navigateTo(redirectUrl);
                     }
                 }
                 console.log(" create  transaction-->" + JSON.stringify(response));
@@ -450,6 +457,10 @@ const Payment = () => {
                 console.log("err" + err);
             });
     }
+   function  navigateTo(url: string) {
+        console.log("Invoked navigation function-->");
+        window.location.href = url;
+      }
 
     const updatePaymentLinkRecord = () => {
         console.log("Invoked Update PayLink");

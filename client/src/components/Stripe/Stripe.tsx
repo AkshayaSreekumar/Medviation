@@ -62,7 +62,7 @@ const Stripe = (props: any) => {
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
           Authorization:
-            " Bearer sk_test_51K9PF1JZdmpiz6ZwomLVnx7eXnu0Buv19EwOe262mK5uj5E4bTpWO1trTF5S1OvVmdnpWtd2fm8s0HHbMlrqY2uZ00lWc3uV7c",
+            " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
         },
       }
     )
@@ -109,7 +109,7 @@ const Stripe = (props: any) => {
       method: "POST",
       headers: {
         "x-rapidapi-host": "https://api.stripe.com",
-        Authorization: "Bearer sk_test_51K9PF1JZdmpiz6ZwomLVnx7eXnu0Buv19EwOe262mK5uj5E4bTpWO1trTF5S1OvVmdnpWtd2fm8s0HHbMlrqY2uZ00lWc3uV7c",
+        Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
       },
     })
       .then((response) => response.json())
@@ -138,7 +138,7 @@ const Stripe = (props: any) => {
       method: "POST",
       headers: {
         "x-rapidapi-host": "https://api.stripe.com",
-        Authorization: "Bearer sk_test_51K9PF1JZdmpiz6ZwomLVnx7eXnu0Buv19EwOe262mK5uj5E4bTpWO1trTF5S1OvVmdnpWtd2fm8s0HHbMlrqY2uZ00lWc3uV7c",
+        Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
       },
     })
       .then((response) => response.json())
