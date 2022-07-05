@@ -74,7 +74,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
         console.log(" delete response -->" + JSON.stringify(response));
         handleClose()
         refreshCardList();
-        setAlert({status:'success',message:'Payment Method removed Sucessfully'});
+        setAlert({status:'success',message:'Payment Method is removed Sucessfully'});
       })
       .catch((err) => {
         console.log(err);
@@ -103,7 +103,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
               </div>
               <div className='col-10'>
                 <p className='fw-bold h7 mb-0'><span className='ccNumber position-relative'>XXXXXXXX{acc.card.last4}</span></p>
-                <p className='h8 mb-1'><span className='textmuted h8'> Valid Thru</span><span className='ms-md-2'>{acc.card.exp_month}</span> / <span>{acc.card.exp_year}</span></p>
+                <p className='h8 mb-1'><span className='textmuted h8'> Valid Upto</span><span className='ms-md-2'>{acc.card.exp_month}</span> / <span>{acc.card.exp_year}</span></p>
                 <div className='carActionBtn'>
                   <Dropdown>
                     <Dropdown.Toggle variant="light" className='text-muted bg-white dropdown-toggle-custom-' size='lg' id="dropdown-basic">
@@ -128,7 +128,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       <Modal.Header >
         <Modal.Title className='fw-bold h6'><i className="fa fa-exclamation-triangle text-warning me-3" aria-hidden="true"></i>Remove</Modal.Title>
       </Modal.Header>
-      <Modal.Body>The payment method will no longer be usable for you !.</Modal.Body>
+      <Modal.Body>This payment method will no longer be usable for you !.</Modal.Body>
       <Modal.Footer className='pt-0 border-top-0'>
         <Button variant="secondary" size="sm" onClick={handleClose}>
           Close

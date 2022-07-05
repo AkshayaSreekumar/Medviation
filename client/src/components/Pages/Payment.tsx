@@ -703,7 +703,7 @@ const Payment = () => {
                                         <p className="ms-auto"> <span className='fw-bold'>{numberFormat(totalAmount)}</span></p>
                                     </div>
                                     <div className="h8 mb-4">
-                                        <Form.Check aria-label="option 1" label='I accept Lorem ipsum dolor sit amet elit. Adipisci ea harum sed quaerat tenetur' onChange={(e) => { setAcceptCondition(e.target.checked) }} disabled={!paymentSelected} />
+                                        <Form.Check aria-label="option 1" label='I agree to the Terms of Service and Privacy Policy' onChange={(e) => { setAcceptCondition(e.target.checked) }} disabled={!paymentSelected} />
                                     </div>
                                 </div>
                             </div>

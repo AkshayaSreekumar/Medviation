@@ -144,7 +144,7 @@ const Stripe = (props: any) => {
       .then((response) => response.json())
       .then((response) => {
         console.log("attach payment medthod----->", response);
-        setAlert({status:'success',message:'New card added Sucessfully'})
+        setAlert({status:'success',message:'New payment method is added sucessfully'})
         loadCardData(props.apicustomerid);
         setIsLoader(false);
         handleClose();
