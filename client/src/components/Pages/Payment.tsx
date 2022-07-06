@@ -28,12 +28,13 @@ const Payment = () => {
     const [showOtherAmoutTextField, setShowOtherAmoutTextField] = React.useState(false);
     const [apicustomerId, setApicustomerId] = useState<string | null>(null);
     const [customerIdentifier, setCustomerIdentifier] = useState<string | null>(null);
-    const [urlmail,setUrlmail] = useState<string | null>(null);
-    const [urlOrderId,setUrlOrderId] = useState<string | null>(null);
-    const [urlContactId,setUrlContactId] = useState<string | null>(null);
-    const [todaysDate,setTodaysDate] = useState<string | null>(null);
-    const [baseUrl,setBaseUrl] = useState<string | null>(null);
-    const [alert,setAlert] = useState({});
+    const [urlmail, setUrlmail] = useState<string | null>(null);
+    const [urlOrderId, setUrlOrderId] = useState<string | null>(null);
+    const [orderidUrl, setOrderidUrl] = useState<string | null>(null);
+    const [urlContactId, setUrlContactId] = useState<string | null>(null);
+    const [todaysDate, setTodaysDate] = useState<string | null>(null);
+    const [baseUrl, setBaseUrl] = useState<string | null>(null);
+    const [alert, setAlert] = useState({});
     const [validLink, setvalidLink] = React.useState(false);
     const [cardType, setCardType] = useState<string | null>(null);
     const [totalAmount, setTotalAmount] = useState<string | null>(null);
@@ -51,7 +52,7 @@ const Payment = () => {
     const [orderQuote, setOrderQuote] = useState<string | null>(null);
     const [billingAddress, setBillingAddress] = useState({});
     const [paymentUrl, setPaymentUrl] = useState('');
-    const [transResponse, setTransResponse] =useState('');
+    const [transResponse, setTransResponse] = useState('');
     const [redirectURL, setRedirectURL] = useState<string | null>(null);
     //const [transIdUrl, settransIdUrl] = useState('');
     const [idempotencyKey, setidempotencyKey] = useState('');
@@ -78,15 +79,15 @@ const Payment = () => {
     console.log(selectedPaymentOption);
 
     useEffect(() => {
-        if(transResponse){
+        if (transResponse) {
             updatePaymentLinkRecord();
         }
         if (!idempotencyKey) {
             createRandomKey();
         }
-        if(!apicustomerId){
-        getPaymentLinkDetails();
-        //getFieldsetData();
+        if (!apicustomerId) {
+            getPaymentLinkDetails();
+            //getFieldsetData();
         }
         if (apicustomerId && dueAmount && orderTotal) {
             setIsLoader(false);
@@ -109,7 +110,8 @@ const Payment = () => {
             setChargeAmount(JSON.stringify(chargeAmd))
             setTotalAmount(JSON.stringify(parseInt(payableAmount) + chargeAmd));
         }
-        if(radioValue === 'card' && apicustomerId){setShowCard(true);
+        if (radioValue === 'card' && apicustomerId) {
+            setShowCard(true);
         }
         // if (!apicustomerId) {
         //     console.log("No Id")
@@ -118,7 +120,7 @@ const Payment = () => {
 
         //     }
         // }
-    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType,radioValue,urlContactId, baseUrl, idempotencyKey])
+    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType, radioValue, urlContactId, baseUrl, idempotencyKey,orderidUrl,transResponse])
 
     const createRandomKey = () => {
         var key = "";
@@ -135,11 +137,9 @@ const Payment = () => {
         //-------------- InterACTPay Dev-----------------//
         //let baseUrl = "https://crma-pay-developer-edition.na163.force.com/";
         //-------- Medviation Dev  ------//
-        let baseUrl="https://crmapay-developer-edition.na213.force.com/";
+        let baseUrl = "https://crmapay-developer-edition.na213.force.com/";
         //------------Medviation Dev Sandbox ----------//
         //let baseUrl = "https://developer-crmapay.cs214.force.com/"
-
-
         setBaseUrl(baseUrl);
         var payLinkParams = { paymentLinkId: urlPaymentLinkId };
         var url = baseUrl + "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
@@ -158,28 +158,31 @@ const Payment = () => {
                 apiResponse = JSON.parse(response);
                 var amountDue = apiResponse.crma_pay__AmountDue__c;
                 var linkActive = apiResponse.crma_pay__Active__c;
-                if(linkActive==false){
-                    console.log("inside if -->"+linkActive);
+                if (linkActive == false) {
+                    console.log("inside if -->" + linkActive);
                     setexpiredLink(true);
                     updatePaymentLinkRecord();
-                  }
+                }
                 var apiUrl = apiResponse.crma_pay__PaymentURL__c;
                 let url = new URL(apiUrl);
-                setUrlOrderId(url.searchParams.get("orderId"));
+                let order =url.searchParams.get("orderId");
+                //setUrlOrderId(url.searchParams.get("orderId"));
+                console.log("1id"+url.searchParams.get("orderId"));
+                console.log("2id1"+order);
+                console.log("2id2"+orderidUrl);
                 setUrlContactId(url.searchParams.get("contactId"));
-                console.log("1");
                 var contact = JSON.stringify(url.searchParams.get("contactId"));
                 console.log("2customerIdentifier");
                 let urlCustomerId = url.searchParams.get("customerId");
-                if(urlCustomerId){
+                if (urlCustomerId) {
                     console.log("inside if 1");
-                setApicustomerId(urlCustomerId);
-                }else{
-                    if(!customerIdentifier){
-                    console.log("inside else 2");
-                    getContactDetails(contact, baseUrl);
+                    setApicustomerId(urlCustomerId);
+                } else {
+                    if (!customerIdentifier) {
+                        console.log("inside else 2");
+                        getContactDetails(contact, baseUrl);
                     }
-                    else{
+                    else {
                         setApicustomerId(customerIdentifier);
                     }
                 }
@@ -190,7 +193,7 @@ const Payment = () => {
                 var addedDate = date.setHours(date.getHours() + 8);
                 const current = new Date();
                 setTodaysDate(`${current.getFullYear()}-${current.getMonth() + 1
-                }-${current.getDate()}`);
+                    }-${current.getDate()}`);
                 var d1 = new Date(addedDate);
                 var d2 = new Date(current);
                 var timeleft = d1.getTime() - d2.getTime();
@@ -230,7 +233,9 @@ const Payment = () => {
                 // if (y[0].AmountDue__c) {
                 //     setDueAmount(y[0].AmountDue__c);
                 // }
-                getOrderDetails(urlOrderId, baseUrl);
+                console.log("beforeorder"+order);
+                //getOrderDetails(urlOrderId, baseUrl);
+                getOrderDetails(order, baseUrl);
                 getFieldsetData();
                 //getStripeKey();
             })
@@ -238,51 +243,51 @@ const Payment = () => {
                 console.log("err" + err);
             })
     }
-   
+
     const getFieldsetData = () => {
-        console.log("Invoked getFieldsetData"+urlPaymentLinkId);
+        console.log("Invoked getFieldsetData" + urlPaymentLinkId);
         var ipParams = { inputId: urlPaymentLinkId };
         // var ipParams = {};
         // ipParams.inputId = this.urlOrderId;
         var url =
-        baseUrl +
-          "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
-          JSON.stringify(ipParams);
-          console.log("FieldsetAPI=====>"+url);
+            baseUrl +
+            "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
+            JSON.stringify(ipParams);
+        console.log("FieldsetAPI=====>" + url);
         fetch(url, {
-          method: "GET",
-          headers: {
-            mode: "cors",
-            "Access-Control-Allow-Origin": "*",
-          },
+            method: "GET",
+            headers: {
+                mode: "cors",
+                "Access-Control-Allow-Origin": "*",
+            },
         })
-          .then((response) => response.text())
-          .then((response) => {
-            response = response.slice(1, response.length - 1);
-            console.log("getFieldsetData-->y------>"+response);
-            var Reponse = JSON.parse(response);
-            console.log("Reponse" + JSON.stringify(Reponse));
-            console.log("Reponse#########"+Reponse[0].Amount_Due__c);
-            // this.dueAmount = Reponse[0].vlocity_cmt__EffectiveOrderTotal__c;
-            // this.setState({ dueAmount: this.dueAmount });
-            // console.log("#########"+this.state.dueAmount);
-             var dueAmount = Reponse[0].Amount_Due__c;
-            setDueAmount(dueAmount);
-          })
-          .catch((err) => {
-            console.log("err" + err);
-          })
-      }
+            .then((response) => response.text())
+            .then((response) => {
+                response = response.slice(1, response.length - 1);
+                console.log("getFieldsetData-->y------>" + response);
+                var Reponse = JSON.parse(response);
+                console.log("Reponse" + JSON.stringify(Reponse));
+                console.log("Reponse#########" + Reponse[0].Amount_Due__c);
+                // this.dueAmount = Reponse[0].vlocity_cmt__EffectiveOrderTotal__c;
+                // this.setState({ dueAmount: this.dueAmount });
+                // console.log("#########"+this.state.dueAmount);
+                var dueAmount = Reponse[0].Amount_Due__c;
+                setDueAmount(dueAmount);
+            })
+            .catch((err) => {
+                console.log("err" + err);
+            })
+    }
 
-      const getContactDetails = (contactId: string, baseUrl: string) => {
-          console.log("invoked create contact"+JSON.parse(contactId));
-          var contactParams = { contactId: JSON.parse(contactId) };
+    const getContactDetails = (contactId: string, baseUrl: string) => {
+        console.log("invoked create contact" + JSON.parse(contactId));
+        var contactParams = { contactId: JSON.parse(contactId) };
         //var contactParams = { contactId: contactId };
-        console.log("contactParams"+JSON.stringify(contactParams));
+        console.log("contactParams" + JSON.stringify(contactParams));
         var url = baseUrl +
-            "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +JSON.stringify(contactParams);
-            //JSON.parse(JSON.stringify(contactParams));
-            console.log("url1"+url);
+            "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" + JSON.stringify(contactParams);
+        //JSON.parse(JSON.stringify(contactParams));
+        console.log("url1" + url);
         console.log("this.contact url ---->" + url);
         fetch(url, {
             method: "GET",
@@ -349,12 +354,17 @@ const Payment = () => {
             });
     }
     const getOrderDetails = (orderId: string | null, baseUrl: string | null) => {
+        console.log("invoked order--->" + orderId);
+        if(orderId){
+            console.log("inside order if");
+         setOrderidUrl(orderId);
+        }
         var orderParams = { orderId: orderId };
-        console.log("baseUrls--->" + baseUrl);
         var url =
             baseUrl +
             "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
             JSON.stringify(orderParams);
+            console.log("orderurl"+url);
         console.log("this.order url ---->" + url);
         fetch(url, {
             method: "GET",
@@ -370,10 +380,12 @@ const Payment = () => {
                 var orderReponse = JSON.stringify(JSON.parse(response));
                 var orderNum = contactReponse.orderdetails[0].OrderNumber;
                 var total = contactReponse.orderdetails[0].TotalAmount;
+                console.log("order1"+total);
                 setOrderNumber(orderNum);
                 setOrderTotal(total);
                 let initialOrderAmount = '' + total + '';
                 setTransactionTotal(initialOrderAmount);
+                console.log("order2"+transactionTotal);
                 if (contactReponse.orderdetails[0].OpportunityId) {
                     setOrderOpportunity(contactReponse.orderdetails[0].OpportunityId);
                     setOrderQuote(contactReponse.orderdetails[0].QuoteId);
@@ -488,12 +500,15 @@ const Payment = () => {
         //var amount = '"'+ this.payingAmount+  '"';
         //console.log("New amount------>"+amount);
         //const amount = this.payingAmount;
+
+        console.log("order14"+orderidUrl);
         var transactionParams = {
             paymentGatewayIdentifier: transactionId,
             Amount: payableAmount,
             transactionEmail: urlmail,
             transactionCurrencyCode: currencyCode,
-            transactionOrder: urlOrderId,
+            //transactionOrder: urlOrderId,
+            transactionOrder: orderidUrl,
             transactionContact: urlContactId,
             processedDateTime: todaysDate,
             transactionStatus: transactionstatus,
@@ -524,39 +539,39 @@ const Payment = () => {
                 if (response) {
                     console.log('LstResponse------------------------->' + response);
                     var xy = response;
-                    console.log("xxxx->"+xy);
+                    console.log("xxxx->" + xy);
                     setTransResponse(xy);
-                    console.log('transid------------------------->' +transResponse);
-                    
+                    console.log('transid------------------------->' + transResponse);
+
                     localStorage.setItem('RandomKey', idempotencyKey);
                     setIsLoader(false);
-                    //setAlert({ status: 'success', message: 'Payment completed successfully' });
-                    if(redirectURL){
+                    //setAlert({ status: 'success', message: ' Your payment is successfully completed ' });
+                    if (redirectURL) {
                         window.location.href = redirectURL;
                     }
                     //getPaymentLinkDetails();
                     //this.transIdUrl = response;
                     //var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page' + '?transId=' + this.transIdUrl;
                     //console.log("invoked redirecturl" + redirectUrl);
-                    if(transResponse){
-                    console.log('transid--------if----------------->' + transResponse);
-                     updatePaymentLinkRecord();
-                    // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
-                    // console.log("redirecturl-->"+redirectUrl);
-                    // navigateTo(redirectUrl);
+                    if (response) {
+                        console.log('transid--------if----------------->' + transResponse);
+                        updatePaymentLinkRecord();
+                        // var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                        // console.log("redirecturl-->"+redirectUrl);
+                        // navigateTo(redirectUrl);
                     }
-                //   var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
-                //     console.log("redirecturl-->"+redirectUrl);
-                //     navigateTo(redirectUrl);
-                    
+                    //   var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                    //     console.log("redirecturl-->"+redirectUrl);
+                    //     navigateTo(redirectUrl);
+
                 }
                 console.log(" create  transaction-->" + JSON.stringify(response));
                 // Med Sandbox
-              //var redirectUrl = 'https://developer-medviation.cs214.force.com/xchng/s/invoice-page'+'?transId=' + response;
-              //Med Dev
-              var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + response;
-                    console.log("redirecturl-->"+redirectUrl);
-                    navigateTo(redirectUrl);
+                //var redirectUrl = 'https://developer-medviation.cs214.force.com/xchng/s/invoice-page'+'?transId=' + response;
+                //Med Dev
+                var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page' + '?transId=' + response;
+                console.log("redirecturl-->" + redirectUrl);
+                navigateTo(redirectUrl);
             })
             .catch((err) => {
                 setIsLoader(false);
@@ -564,13 +579,13 @@ const Payment = () => {
                 console.log("err" + err);
             });
     }
-   function  navigateTo(url: string) {
+    function navigateTo(url: string) {
         console.log("Invoked navigation function-->");
         window.location.href = url;
-      }
+    }
 
     const updatePaymentLinkRecord = () => {
-        console.log("Invoked Update PayLink"+transResponse);
+        console.log("Invoked Update PayLink" + transResponse);
         //var transId = settransIdUrl;
         if (transResponse) {
             var payLinkRcdParamsWithId = {
@@ -622,204 +637,204 @@ const Payment = () => {
     return (
         <>
             {isLoader ? <Spinner /> : null}
-            <Alert alert={alert} setAlert={setAlert}/>
+            <Alert alert={alert} setAlert={setAlert} />
             {expiredLink ? <div className='container'><div className="alert alert-danger opacity-75 mt-5" role="alert">
                 <h4 className="alert-heading">Oops!</h4>
                 <p>This link is expired.</p>
                 <hr />
                 <p className="mb-0">This URL is not valid anymore.</p>
-            </div> </div>:
-            <div className="payment-container container">
-                <div className="row m-0">
-                    <div className="col-md-7 col-12">
-                        <div className="row">
-                            <div className="col-12 mb-4">
-                                <div className="row box-right card-bg-img">
-                                    <div className="col-md-8 ps-0 ">
-                                        <p className="ps-3 textmuted fw-bold h6 mb-0">TOTAL AMOUNT</p>
-                                        <p className="h1 fw-bold d-flex"> <span
-                                            className=" fas fa-dollar-sign textmuted pe-1 h6 align-text-top mt-1"></span>{numberFormat(orderTotal)}
-                                            {/* <span className="textmuted">.58</span> */}
-                                        </p>
-                                        {/* <p className="ms-3 px-2 bg-green">+10% since last month</p> */}
-                                    </div>
-                                    <div className="col-md-4">
-                                        <p className="p-org"> <span className="fas fa-circle pe-2"></span>Due amount </p>
-                                        <p className="fw-bold mb-3">{numberFormat(dueAmount)}
-                                        </p>
-                                        {/* <p className="p-blue"><span className="fas fa-circle pe-2"></span>Amount Paid</p>
+            </div> </div> :
+                <div className="payment-container container">
+                    <div className="row m-0">
+                        <div className="col-md-7 col-12">
+                            <div className="row">
+                                <div className="col-12 mb-4">
+                                    <div className="row box-right card-bg-img">
+                                        <div className="col-md-8 ps-0 ">
+                                            <p className="ps-3 textmuted fw-bold h6 mb-0">TOTAL AMOUNT</p>
+                                            <p className="h1 fw-bold d-flex"> <span
+                                                className=" fas fa-dollar-sign textmuted pe-1 h6 align-text-top mt-1"></span>{numberFormat(orderTotal)}
+                                                {/* <span className="textmuted">.58</span> */}
+                                            </p>
+                                            {/* <p className="ms-3 px-2 bg-green">+10% since last month</p> */}
+                                        </div>
+                                        <div className="col-md-4">
+                                            <p className="p-org"> <span className="fas fa-circle pe-2"></span>Due amount </p>
+                                            <p className="fw-bold mb-3">{numberFormat(dueAmount)}
+                                            </p>
+                                            {/* <p className="p-blue"><span className="fas fa-circle pe-2"></span>Amount Paid</p>
                                         <p className="fw-bold">{numberFormat(paidAmount)}
                                         </p> */}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="col-12 px-0 mb-4">
-                                <div className="box-right card-bg-img">
-                                    <div className="d-flex pb-2">
-                                        <p className="fw-bold h7">
-                                            Order Summary  <span className="textmuted"> / ({orderNumber})</span></p>
-                                        <p className="ms-auto p-blue text-end">
-                                        </p>
-                                    </div>
-                                    <div className="row pb-2">
-                                        <div className="col-6">
-                                            <p className="textmuted h8">Patient Name</p>
-                                            <p className='h7'>{patientName ? patientName : <Placeholder className="w-100 h9" animation="glow">
-                                                <Placeholder xs={7} />
-                                            </Placeholder>}
+                                <div className="col-12 px-0 mb-4">
+                                    <div className="box-right card-bg-img">
+                                        <div className="d-flex pb-2">
+                                            <p className="fw-bold h7">
+                                                Order Summary  <span className="textmuted"> / ({orderNumber})</span></p>
+                                            <p className="ms-auto p-blue text-end">
                                             </p>
                                         </div>
-                                        <div className="col-6 text-end">
-                                            <p className="textmuted h8">Travel Date</p>
-                                            <p className='h7'>{travelDate ? travelDate : <Placeholder className="w-100 h9" animation="glow">
-                                                <Placeholder xs={7} />
-                                            </Placeholder>}</p>
+                                        <div className="row pb-2">
+                                            <div className="col-6">
+                                                <p className="textmuted h8">Patient Name</p>
+                                                <p className='h7'>{patientName ? patientName : <Placeholder className="w-100 h9" animation="glow">
+                                                    <Placeholder xs={7} />
+                                                </Placeholder>}
+                                                </p>
+                                            </div>
+                                            <div className="col-6 text-end">
+                                                <p className="textmuted h8">Travel Date</p>
+                                                <p className='h7'>{travelDate ? travelDate : <Placeholder className="w-100 h9" animation="glow">
+                                                    <Placeholder xs={7} />
+                                                </Placeholder>}</p>
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-6">
+                                                <p className="textmuted h8">Orgin</p>
+                                                <p className='h7'>{origin ? origin : <Placeholder className="w-100 h9" animation="glow">
+                                                    <Placeholder xs={7} />
+                                                </Placeholder>}</p>
+                                            </div>
+                                            <div className="col-6 text-end">
+                                                <p className="textmuted h8">Destination</p>
+                                                <p className='h7'>{destination ? destination : <Placeholder className="w-100 h9" animation="glow">
+                                                    <Placeholder xs={7} />
+                                                </Placeholder>} </p>
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
+                                {showBillingDetails ?
+                                    <div className="col-12 px-0">
+                                        <div className="box-right card-bg-img">
+                                            <div className="d-flex mb-2">
+                                                <p className="fw-bold">Billing address</p>
+                                            </div>
+                                            <div className="mb-2">
+                                                <p className="h7 mb-1">{billingCity} </p>
+                                                <p className="h7 mb-1">{billingLine1}, {billingLine2}</p>
+                                                <p className="h7 "><span>{billingState}</span> ,<span> {billingCountry} </span> <span> {billingPostalcode}</span></p>
+                                            </div>
+                                        </div>
+                                    </div> : ''}
+                            </div>
+                        </div>
+                        <div className="col-md-5 col-12 ps-md-5 p-0 ">
+                            <div className="box-left card-bg-img">
+
+                                <div className="">
                                     <div className="row">
-                                        <div className="col-6">
-                                            <p className="textmuted h8">Orgin</p>
-                                            <p className='h7'>{origin ? origin : <Placeholder className="w-100 h9" animation="glow">
-                                                <Placeholder xs={7} />
-                                            </Placeholder>}</p>
+                                        <div className="col-md-6">
+                                            <p className="fw-bold h7 mb-1 pt-2">Choose Payment Method</p>
                                         </div>
-                                        <div className="col-6 text-end">
-                                            <p className="textmuted h8">Destination</p>
-                                            <p className='h7'>{destination ? destination : <Placeholder className="w-100 h9" animation="glow">
-                                                <Placeholder xs={7} />
-                                            </Placeholder>} </p>
+                                        <div className="col-md-6 float-right text-end">
+                                            <ButtonGroup>
+                                                {radios.map((radio, idx) => (
+                                                    <ToggleButton
+                                                        key={idx}
+                                                        id={`radio-${idx}`}
+                                                        type="radio"
+                                                        variant={idx % 2 ? 'outline-primary' : 'outline-primary'}
+                                                        name="radio"
+                                                        size="sm"
+                                                        value={radio.value}
+                                                        checked={radioValue === radio.value}
+                                                        onChange={(e) => {
+                                                            setShowBillingDetails(false);
+                                                            setPaymentSelected(false);
+                                                            setRadioValue(e.currentTarget.value); if (e.currentTarget.value === 'card') {
+                                                                setShowCard(true);
+                                                                setShowAch(false);
+                                                            } else { setShowAch(true); setShowCard(false); }
+                                                        }}
+                                                    >
+                                                        {radio.name}
+                                                    </ToggleButton>
+                                                ))}
+                                            </ButtonGroup>
+                                        </div>
+                                    </div>
+                                    <p className="textmuted h8 mb-0">Please choose any payment method to continue</p>
+                                    <div className="">
+                                        {showAch ? <Plaid apicustomerid={apicustomerId} selectedBankPayment={selectedBankPayment} /> : null}
+                                    </div>
+                                    <div className="">
+                                        {showCard ? <Stripe apicustomerid={apicustomerId} selectedCardPayment={selectedCardPayment} /> : null}
+                                    </div>
+                                    {showCard || showAch ? null : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center mb-3"><Placeholder className="w-100 h9" animation="glow">
+                                        <Placeholder xs={7} /> <Placeholder xs={4} /> <Placeholder xs={4} />{' '}
+                                        <Placeholder xs={6} /> <Placeholder xs={8} />
+                                    </Placeholder></div>}
+                                </div>
+                                <div className='mb-2'>
+                                    <form className="list-group">
+                                        <label className="list-group-item">
+                                            <div className="row">
+                                                <div className='col-1 py-2'>
+                                                    <input type="radio" className="me-3" id="default" name="Default-Payment" value="default" checked={selectedPaymentOption === 'default'} onChange={(e) => {
+                                                        setPayType(e.target.value)
+                                                    }} disabled={!paymentSelected} /></div>
+                                                <div className='col-5 py-2'>
+                                                    Total amount due
+                                                </div>
+                                                <div className='col-6 py-2 text-end'>
+                                                    {numberFormat(dueAmount)}
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label className="list-group-item">
+                                            <div className="row">
+                                                <div className='col-1 py-2'>
+                                                    <input type="radio" className="me-3" id="other-payment" name="other-payment" value="other-payment" checked={selectedPaymentOption === 'other-payment'} onChange={(e) => {
+                                                        setPayType(e.target.value); setPayableAmount(''); setTotalAmount(''); setChargeAmount('');
+                                                    }} disabled={!paymentSelected} /></div>
+                                                <div className='col-5 py-2'>
+                                                    Other amount
+                                                </div>
+                                                <div className='col-6 text-end'>
+                                                    {showOtherAmoutTextField ?
+                                                        <div className="input-group">
+                                                            <span className="input-group-text">$</span>
+                                                            <input type="text" className="form-control border-end-0 text-end pe-0" aria-label="Amount (to the nearest dollar)" onKeyUp={(e) => {
+                                                                setPayableAmount(e.currentTarget.value);
+                                                            }} />
+                                                            <span className="input-group-text bg-transparent ps-0">.00</span>
+                                                        </div> : null}
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </form>
+                                </div>
+                                <div>
+                                    <div className="h8">
+                                        <div className="row m-0 border-bottom mb-3">
+                                            <div className="col-8 h8 pe-0 ps-2">
+                                                <span className="d-block py-2">Payment Charge</span>
+                                            </div>
+                                            <div className="col-4 p-0 pe-2 text-end">
+                                                <span className="d-block py-2">{numberFormat(chargeAmount)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="d-flex h7 mb-2 px-2">
+                                            <p className="">Total Amount</p>
+                                            <p className="ms-auto"> <span className='fw-bold'>{numberFormat(totalAmount)}</span></p>
+                                        </div>
+                                        <div className="h8 mb-4">
+                                            <Form.Check aria-label="option 1" label='I agree to the Terms of Service and Privacy Policy' onChange={(e) => { setAcceptCondition(e.target.checked) }} disabled={!paymentSelected} />
                                         </div>
                                     </div>
                                 </div>
+
+                                <button className="btn btn-primary d-block h8 w-100" onClick={makepayment} disabled={!acceptCondition}>PAY NOW
+                                </button>
                             </div>
-                            {showBillingDetails ?
-                                <div className="col-12 px-0">
-                                    <div className="box-right card-bg-img">
-                                        <div className="d-flex mb-2">
-                                            <p className="fw-bold">Billing address</p>
-                                        </div>
-                                        <div className="mb-2">
-                                            <p className="h7 mb-1">{billingCity} </p>
-                                            <p className="h7 mb-1">{billingLine1}, {billingLine2}</p>
-                                            <p className="h7 "><span>{billingState}</span> ,<span> {billingCountry} </span> <span> {billingPostalcode}</span></p>
-                                        </div>
-                                    </div>
-                                </div> : ''}
                         </div>
                     </div>
-                    <div className="col-md-5 col-12 ps-md-5 p-0 ">
-                        <div className="box-left card-bg-img">
-
-                            <div className="">
-                                <div className="row">
-                                    <div className="col-md-6">
-                                        <p className="fw-bold h7 mb-1 pt-2">Choose Payment Method</p>
-                                    </div>
-                                    <div className="col-md-6 float-right text-end">
-                                        <ButtonGroup>
-                                            {radios.map((radio, idx) => (
-                                                <ToggleButton
-                                                    key={idx}
-                                                    id={`radio-${idx}`}
-                                                    type="radio"
-                                                    variant={idx % 2 ? 'outline-primary' : 'outline-primary'}
-                                                    name="radio"
-                                                    size="sm"
-                                                    value={radio.value}
-                                                    checked={radioValue === radio.value}
-                                                    onChange={(e) => {
-                                                        setShowBillingDetails(false);
-                                                        setPaymentSelected(false);
-                                                        setRadioValue(e.currentTarget.value); if (e.currentTarget.value === 'card') {
-                                                            setShowCard(true);
-                                                            setShowAch(false);
-                                                        } else { setShowAch(true); setShowCard(false); }
-                                                    }}
-                                                >
-                                                    {radio.name}
-                                                </ToggleButton>
-                                            ))}
-                                        </ButtonGroup>
-                                    </div>
-                                </div>
-                                <p className="textmuted h8 mb-0">Please choose any payment method to continue</p>
-                                <div className="">
-                                    {showAch ? <Plaid apicustomerid={apicustomerId} selectedBankPayment={selectedBankPayment} /> : null}
-                                </div>
-                                <div className="">
-                                    {showCard ? <Stripe apicustomerid={apicustomerId} selectedCardPayment={selectedCardPayment} /> : null}
-                                </div>
-                                {showCard || showAch ? null : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center mb-3"><Placeholder className="w-100 h9" animation="glow">
-                                    <Placeholder xs={7} /> <Placeholder xs={4} /> <Placeholder xs={4} />{' '}
-                                    <Placeholder xs={6} /> <Placeholder xs={8} />
-                                </Placeholder></div>}
-                            </div>
-                            <div className='mb-2'>
-                                <form className="list-group">
-                                    <label className="list-group-item">
-                                        <div className="row">
-                                            <div className='col-1 py-2'>
-                                                <input type="radio" className="me-3" id="default" name="Default-Payment" value="default" checked={selectedPaymentOption === 'default'} onChange={(e) => {
-                                                    setPayType(e.target.value)
-                                                }} disabled={!paymentSelected} /></div>
-                                            <div className='col-5 py-2'>
-                                                Total amount due
-                                            </div>
-                                            <div className='col-6 py-2 text-end'>
-                                                {numberFormat(dueAmount)}
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label className="list-group-item">
-                                        <div className="row">
-                                            <div className='col-1 py-2'>
-                                                <input type="radio" className="me-3" id="other-payment" name="other-payment" value="other-payment" checked={selectedPaymentOption === 'other-payment'} onChange={(e) => {
-                                                    setPayType(e.target.value); setPayableAmount(''); setTotalAmount(''); setChargeAmount('');
-                                                }} disabled={!paymentSelected} /></div>
-                                            <div className='col-5 py-2'>
-                                                Other amount
-                                            </div>
-                                            <div className='col-6 text-end'>
-                                                {showOtherAmoutTextField ?
-                                                    <div className="input-group">
-                                                        <span className="input-group-text">$</span>
-                                                        <input type="text" className="form-control border-end-0 text-end pe-0" aria-label="Amount (to the nearest dollar)" onKeyUp={(e) => {
-                                                            setPayableAmount(e.currentTarget.value);
-                                                        }} />
-                                                        <span className="input-group-text bg-transparent ps-0">.00</span>
-                                                    </div> : null}
-                                            </div>
-                                        </div>
-                                    </label>
-                                </form>
-                            </div>
-                            <div>
-                                <div className="h8">
-                                    <div className="row m-0 border-bottom mb-3">
-                                        <div className="col-8 h8 pe-0 ps-2">
-                                            <span className="d-block py-2">Payment Charge</span>
-                                        </div>
-                                        <div className="col-4 p-0 pe-2 text-end">
-                                            <span className="d-block py-2">{numberFormat(chargeAmount)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex h7 mb-2 px-2">
-                                        <p className="">Total Amount</p>
-                                        <p className="ms-auto"> <span className='fw-bold'>{numberFormat(totalAmount)}</span></p>
-                                    </div>
-                                    <div className="h8 mb-4">
-                                        <Form.Check aria-label="option 1" label='I agree to the Terms of Service and Privacy Policy' onChange={(e) => { setAcceptCondition(e.target.checked) }} disabled={!paymentSelected} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button className="btn btn-primary d-block h8 w-100" onClick={makepayment} disabled={!acceptCondition}>PAY NOW
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div >}
+                </div >}
 
         </>
     )

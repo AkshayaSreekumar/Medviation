@@ -257,7 +257,7 @@ export default function CardForm(props: CardFormProps) {
                 className="form-control mb-3"
                 autoComplete="off"
                 name="country"
-                placeholder='Country'
+                placeholder='Country code'
                 value={selectedCreditCard.country}
                 onChange={handleFormChange}
                 isInvalid={!!errors.country}
