@@ -27,6 +27,7 @@ const Payment = () => {
     const [paymentSelected, setPaymentSelected] = React.useState(false);
     const [showOtherAmoutTextField, setShowOtherAmoutTextField] = React.useState(false);
     const [apicustomerId, setApicustomerId] = useState<string | null>(null);
+    const [customerIdentifier, setCustomerIdentifier] = useState<string | null>(null);
     const [urlmail,setUrlmail] = useState<string | null>(null);
     const [urlOrderId,setUrlOrderId] = useState<string | null>(null);
     const [urlContactId,setUrlContactId] = useState<string | null>(null);
@@ -83,8 +84,10 @@ const Payment = () => {
         if (!idempotencyKey) {
             createRandomKey();
         }
+        if(!apicustomerId){
         getPaymentLinkDetails();
         //getFieldsetData();
+        }
         if (apicustomerId && dueAmount && orderTotal) {
             setIsLoader(false);
         }
@@ -108,7 +111,14 @@ const Payment = () => {
         }
         if(radioValue === 'card' && apicustomerId){setShowCard(true);
         }
-    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType,radioValue,urlContactId, baseUrl, idempotencyKey,transResponse])
+        // if (!apicustomerId) {
+        //     console.log("No Id")
+        //     if (urlContactId && baseUrl) {
+        //         //getContactDetails(urlContactId, baseUrl);
+
+        //     }
+        // }
+    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType,radioValue,urlContactId, baseUrl, idempotencyKey])
 
     const createRandomKey = () => {
         var key = "";
@@ -126,6 +136,8 @@ const Payment = () => {
         //let baseUrl = "https://crma-pay-developer-edition.na163.force.com/";
         //-------- Medviation Dev  ------//
         let baseUrl="https://crmapay-developer-edition.na213.force.com/";
+        //------------Medviation Dev Sandbox ----------//
+        //let baseUrl = "https://developer-crmapay.cs214.force.com/"
 
 
         setBaseUrl(baseUrl);
@@ -154,12 +166,23 @@ const Payment = () => {
                 var apiUrl = apiResponse.crma_pay__PaymentURL__c;
                 let url = new URL(apiUrl);
                 setUrlOrderId(url.searchParams.get("orderId"));
-                let urlCustomerId = url.searchParams.get("customerId");
-                setApicustomerId(urlCustomerId);
-                // if (urlCustomerId) {
-                //     setShowCard(true);
-                // }
                 setUrlContactId(url.searchParams.get("contactId"));
+                console.log("1");
+                var contact = JSON.stringify(url.searchParams.get("contactId"));
+                console.log("2customerIdentifier");
+                let urlCustomerId = url.searchParams.get("customerId");
+                if(urlCustomerId){
+                    console.log("inside if 1");
+                setApicustomerId(urlCustomerId);
+                }else{
+                    if(!customerIdentifier){
+                    console.log("inside else 2");
+                    getContactDetails(contact, baseUrl);
+                    }
+                    else{
+                        setApicustomerId(customerIdentifier);
+                    }
+                }
                 let urlAmount = url.searchParams.get("amount");
                 setUrlmail(url.searchParams.get("mail"));
                 let createdDate = apiResponse.CreatedDate;
@@ -251,6 +274,80 @@ const Payment = () => {
           })
       }
 
+      const getContactDetails = (contactId: string, baseUrl: string) => {
+          console.log("invoked create contact"+JSON.parse(contactId));
+          var contactParams = { contactId: JSON.parse(contactId) };
+        //var contactParams = { contactId: contactId };
+        console.log("contactParams"+JSON.stringify(contactParams));
+        var url = baseUrl +
+            "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +JSON.stringify(contactParams);
+            //JSON.parse(JSON.stringify(contactParams));
+            console.log("url1"+url);
+        console.log("this.contact url ---->" + url);
+        fetch(url, {
+            method: "GET",
+            headers: {
+                mode: "cors",
+                "Access-Control-Allow-Origin": "*",
+            },
+        })
+            .then((response) => response.text())
+            .then((response) => {
+                response = response.slice(1, response.length - 1);
+                var contactReponse = JSON.parse(response);
+                var name = contactReponse.Name;
+                var email = contactReponse.Email;
+                createCustomer(name, email, contactId)
+            })
+            .catch((err) => {
+                console.log("err" + err);
+            })
+    }
+
+    const createCustomer = (name: string, email: string, contactId: string) => {
+        console.log("invoked create customer");
+        fetch(
+            "https://api.stripe.com/v1/customers?name=" + name + "&email=" + email,
+            {
+                method: "POST",
+                headers: {
+                    "x-rapidapi-host": "https://api.stripe.com",
+                    Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+                },
+            }
+        )
+            .then((response) => response.json())
+            .then((response) => {
+                var newcustomerId = response.id;
+                console.log("customer create -->" + response.id);
+                if (newcustomerId) {
+                    let updateContParams = { contactId: JSON.parse(contactId), customerId: response.id };
+                    var url = baseUrl +
+                        "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=POST&inputParams=" +
+                        JSON.stringify(updateContParams);
+                    console.log("this.final url --->" + url);
+                    fetch(url, {
+                        method: "GET",
+                        headers: {
+                            mode: "cors",
+                            "Access-Control-Allow-Origin": "*",
+                        },
+                    })
+                        .then((response) => response.json())
+                        .then((response) => {
+                            console.log(" update  contact-->" + JSON.stringify(response));
+                            setApicustomerId(newcustomerId)
+                            setCustomerIdentifier(newcustomerId);
+                        })
+                        .catch((err) => {
+                            console.log("err" + err);
+                        });
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
     const getOrderDetails = (orderId: string | null, baseUrl: string | null) => {
         var orderParams = { orderId: orderId };
         console.log("baseUrls--->" + baseUrl);
@@ -448,12 +545,15 @@ const Payment = () => {
                     // console.log("redirecturl-->"+redirectUrl);
                     // navigateTo(redirectUrl);
                     }
-                  var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
-                    console.log("redirecturl-->"+redirectUrl);
-                    navigateTo(redirectUrl);
+                //   var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + transResponse;
+                //     console.log("redirecturl-->"+redirectUrl);
+                //     navigateTo(redirectUrl);
                     
                 }
                 console.log(" create  transaction-->" + JSON.stringify(response));
+                // Med Sandbox
+              //var redirectUrl = 'https://developer-medviation.cs214.force.com/xchng/s/invoice-page'+'?transId=' + response;
+              //Med Dev
               var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page'+'?transId=' + response;
                     console.log("redirecturl-->"+redirectUrl);
                     navigateTo(redirectUrl);
