@@ -242,7 +242,7 @@ export default function CardForm(props: CardFormProps) {
                 className="form-control mb-3"
                 autoComplete="off"
                 name="addrressline2"
-                placeholder='Addres Line 1'
+                placeholder='Addres Line 2(Optional)'
                 value={selectedCreditCard.addrressline2}
                 onChange={handleFormChange}
                 isInvalid={!!errors.addrressline2}
@@ -251,22 +251,7 @@ export default function CardForm(props: CardFormProps) {
                 {errors.addrressline2}
               </Form.Control.Feedback> */}
             </div>
-            <div className="col-3">
-              <Form.Control
-                type="text"
-                className="form-control mb-3"
-                autoComplete="off"
-                name="country"
-                placeholder='Country code'
-                value={selectedCreditCard.country}
-                onChange={handleFormChange}
-                isInvalid={!!errors.country}
-              />
-              {/* <Form.Control.Feedback type="invalid">
-                {errors.country}
-              </Form.Control.Feedback> */}
-            </div>
-            <div className="col-3">
+            <div className="col-6">
               <Form.Control
                 type="text"
                 className="form-control mb-3"
@@ -281,7 +266,7 @@ export default function CardForm(props: CardFormProps) {
                 {errors.city}
               </Form.Control.Feedback> */}
             </div>
-            <div className="col-3">
+            <div className="col-6">
               <Form.Control
                 type="text"
                 className="form-control mb-3"
@@ -296,7 +281,22 @@ export default function CardForm(props: CardFormProps) {
                 {errors.state}
               </Form.Control.Feedback> */}
             </div>
-            <div className="col-3">
+            <div className="col-6">
+              <Form.Control
+                type="text"
+                className="form-control mb-3"
+                autoComplete="off"
+                name="country"
+                placeholder='Country(2-letter code)'
+                value={selectedCreditCard.country}
+                onChange={handleFormChange}
+                isInvalid={!!errors.country}
+              />
+              {/* <Form.Control.Feedback type="invalid">
+                {errors.country}
+              </Form.Control.Feedback> */}
+            </div>
+            <div className="col-6">
               <Form.Control
                 type="text"
                 className="form-control mb-3"
