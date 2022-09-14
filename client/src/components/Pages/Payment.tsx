@@ -140,6 +140,7 @@ const Payment = () => {
         let baseUrl = "https://crmapay-developer-edition.na213.force.com/";
         //------------Medviation Dev Sandbox ----------//
         //let baseUrl = "https://developer-crmapay.cs214.force.com/"
+        console.log("invoked test ----->");
         setBaseUrl(baseUrl);
         var payLinkParams = { paymentLinkId: urlPaymentLinkId };
         var url = baseUrl + "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
