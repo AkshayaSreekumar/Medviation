@@ -6,7 +6,7 @@ function Navbar() {
         <>
             <nav className="navbar navbar-expand-lg navbar-light bg-white- shadow-sm-">
                 <div className="container">
-                    <Link to='/' className='navbar-brand fw-bold'><i className="fa fa-info-circle me-2 text-primary" aria-hidden="true"></i>InterACT Pay</Link>
+                    <Link to='/' className='navbar-brand fw-bold'><i className="fa fa-info-circle me-2 text-primary" aria-hidden="true"></i>Interact Pay</Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>

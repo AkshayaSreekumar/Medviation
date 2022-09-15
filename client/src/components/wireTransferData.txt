@@ -1,0 +1,13 @@
+Bank Name : JPMorgan Chase & Co
+
+Bank Routing Number : 0000123456789
+
+Bank Address : 1572 Bagwell Avenue
+
+City : Gainesville
+
+State : Florida
+
+Zip Code : 30147
+
+Memo Reference : REQ_1021

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Payment.css';
 import Plaid from '../Plaid/Plaid';
 import Stripe from '../Stripe/Stripe';
+import WireTransfer from '../WireTransfer/WireTransfer';
 import { numberFormat } from '../../lib/numberFormat';
 import { ButtonGroup, ToggleButton, Form, Placeholder } from 'react-bootstrap';
 import Spinner from '../Spinner/spinner';
@@ -19,9 +20,21 @@ interface BillingData {
     }
     //}
 }
+interface childparams {
+    oppId: string | null;
+    quoteId: string | null;
+    orderId: string | null;
+    mailId: string | null;
+    contId: string | null;
+    linkId: string | null;
+    dueAmount: string | null;
+    baseUrlValue: string | null;
+    reqNumber: string | null;
+}
 const Payment = () => {
     const [isLoader, setIsLoader] = React.useState(true);
     const [showAch, setShowAch] = React.useState(false);
+    const [showWiretransfer, setShowWiretransfer] = React.useState(false);
     const [showCard, setShowCard] = React.useState(false);
     const [acceptCondition, setAcceptCondition] = React.useState(false);
     const [paymentSelected, setPaymentSelected] = React.useState(false);
@@ -43,6 +56,7 @@ const Payment = () => {
     const [destination, setDestination] = useState<string | null>(null);
     const [travelDate, setTravelDate] = useState<string | null>(null);
     const [dueAmount, setDueAmount] = useState<string | null>(null);
+    const [amountParam, setAmountParam] = useState<string | null>(null);
     const [payableAmount, setPayableAmount] = useState<string | null>(null);
     const [orderNumber, setOrderNumber] = useState<string | null>(null);
     const [orderTotal, setOrderTotal] = useState<string | null>(null);
@@ -66,6 +80,16 @@ const Payment = () => {
     const [chargeAmount, setChargeAmount] = useState<string | null>(null);
     const [expiredLink, setexpiredLink] = React.useState(false);
     const [charge, setCharge] = useState('');
+    const [contId, setContId] = useState<string | null>(null);
+    const [mailId, setMailId] = useState<string | null>(null);
+    const [orderId, setOrderId] = useState<string | null>(null);
+    const [quoteId, setQuoteId] = useState<string | null>(null);
+    const [oppId, setOppId] = useState<string | null>(null);
+    const [linkId, setLinkId] = useState<string | null>(null);
+    const [baseUrlValue, setBaseUrlValue] = useState<string | null>(null);
+    const [reqNumber, setReqNumber] = useState<string | null>(null);
+    const [oppName, setOppName] = useState<string | null>(null);
+    const [isTest, setIsTest] = React.useState(false);
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const urlPaymentLinkId = urlParams.get('Id')
@@ -74,11 +98,16 @@ const Payment = () => {
 
     const radios = [
         { name: 'Card', value: 'card' },
+        //{ name: 'ACH', value: 'ach' },
+        { name: 'Wire Transfer', value: 'wiretransfer' },
     ];
     const [selectedPaymentOption, setSelectedPaymentOption] = useState('default');
     console.log(selectedPaymentOption);
 
     useEffect(() => {
+        if(isTest){
+            console.log("Invoked test from payment.tsx");
+        }
         if (transResponse) {
             updatePaymentLinkRecord();
         }
@@ -113,14 +142,26 @@ const Payment = () => {
         if (radioValue === 'card' && apicustomerId) {
             setShowCard(true);
         }
-        // if (!apicustomerId) {
-        //     console.log("No Id")
-        //     if (urlContactId && baseUrl) {
-        //         //getContactDetails(urlContactId, baseUrl);
-
-        //     }
-        // }
-    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType, radioValue, urlContactId, baseUrl, idempotencyKey,orderidUrl,transResponse])
+        if(dueAmount){
+            setAmountParam(dueAmount);
+        }
+        if(urlContactId && urlmail && orderidUrl && orderOpportunity && orderQuote && urlPaymentLinkId && dueAmount && baseUrl && oppName){
+            setContId(urlContactId);
+            setMailId(urlmail);
+            setOrderId(orderidUrl);
+            setOppId(orderOpportunity);
+            setQuoteId(orderQuote);
+            setLinkId(urlPaymentLinkId);
+            setDueAmount(dueAmount);
+            setBaseUrlValue(baseUrl);
+            setReqNumber(oppName);
+        }
+        // if(urlContactId){setContId(urlContactId);}
+        // if(urlmail){setMailId(urlmail);}
+        // if(orderidUrl){setOrderId(orderidUrl);}
+        // if(orderOpportunity){setOppId(orderOpportunity);}
+        // if(orderQuote){setQuoteId(orderQuote);}
+    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType, radioValue, urlContactId, baseUrl, idempotencyKey, orderidUrl, transResponse])
 
     const createRandomKey = () => {
         var key = "";
@@ -140,7 +181,6 @@ const Payment = () => {
         let baseUrl = "https://crmapay-developer-edition.na213.force.com/";
         //------------Medviation Dev Sandbox ----------//
         //let baseUrl = "https://developer-crmapay.cs214.force.com/"
-        console.log("invoked test ----->");
         setBaseUrl(baseUrl);
         var payLinkParams = { paymentLinkId: urlPaymentLinkId };
         var url = baseUrl + "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
@@ -166,11 +206,11 @@ const Payment = () => {
                 }
                 var apiUrl = apiResponse.crma_pay__PaymentURL__c;
                 let url = new URL(apiUrl);
-                let order =url.searchParams.get("orderId");
+                let order = url.searchParams.get("orderId");
                 //setUrlOrderId(url.searchParams.get("orderId"));
-                console.log("1id"+url.searchParams.get("orderId"));
-                console.log("2id1"+order);
-                console.log("2id2"+orderidUrl);
+                console.log("1id" + url.searchParams.get("orderId"));
+                console.log("2id1" + order);
+                console.log("2id2" + orderidUrl);
                 setUrlContactId(url.searchParams.get("contactId"));
                 var contact = JSON.stringify(url.searchParams.get("contactId"));
                 console.log("2customerIdentifier");
@@ -218,6 +258,10 @@ const Payment = () => {
                 var xy = x.slice(1, x.length - 1);
                 var new1 = xy.replace(/!/g, '"');
                 var y = JSON.parse(new1);
+                if (y[0].Name) {
+                    setOppName(y[0].Name);
+                    console.log("y----ss>"+y[0].Name);
+                }
                 if (y[0].PatientName__c) {
                     setpatientName(y[0].PatientName__c);
                 }
@@ -234,7 +278,7 @@ const Payment = () => {
                 // if (y[0].AmountDue__c) {
                 //     setDueAmount(y[0].AmountDue__c);
                 // }
-                console.log("beforeorder"+order);
+                console.log("beforeorder" + order);
                 //getOrderDetails(urlOrderId, baseUrl);
                 getOrderDetails(order, baseUrl);
                 getFieldsetData();
@@ -246,7 +290,7 @@ const Payment = () => {
     }
 
     const getFieldsetData = () => {
-        console.log("Invoked getFieldsetData" + urlPaymentLinkId);
+        console.log("Invoked getFieldsetData7" + urlPaymentLinkId);
         var ipParams = { inputId: urlPaymentLinkId };
         // var ipParams = {};
         // ipParams.inputId = this.urlOrderId;
@@ -356,16 +400,16 @@ const Payment = () => {
     }
     const getOrderDetails = (orderId: string | null, baseUrl: string | null) => {
         console.log("invoked order--->" + orderId);
-        if(orderId){
+        if (orderId) {
             console.log("inside order if");
-         setOrderidUrl(orderId);
+            setOrderidUrl(orderId);
         }
         var orderParams = { orderId: orderId };
         var url =
             baseUrl +
             "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams=" +
             JSON.stringify(orderParams);
-            console.log("orderurl"+url);
+        console.log("orderurl" + url);
         console.log("this.order url ---->" + url);
         fetch(url, {
             method: "GET",
@@ -381,12 +425,12 @@ const Payment = () => {
                 var orderReponse = JSON.stringify(JSON.parse(response));
                 var orderNum = contactReponse.orderdetails[0].OrderNumber;
                 var total = contactReponse.orderdetails[0].TotalAmount;
-                console.log("order1"+total);
+                console.log("order1" + total);
                 setOrderNumber(orderNum);
                 setOrderTotal(total);
                 let initialOrderAmount = '' + total + '';
                 setTransactionTotal(initialOrderAmount);
-                console.log("order2"+transactionTotal);
+                console.log("order2" + transactionTotal);
                 if (contactReponse.orderdetails[0].OpportunityId) {
                     setOrderOpportunity(contactReponse.orderdetails[0].OpportunityId);
                     setOrderQuote(contactReponse.orderdetails[0].QuoteId);
@@ -399,7 +443,11 @@ const Payment = () => {
                 console.log("err" + err);
             })
     }
-
+    const linkValidity =(isValid: boolean) => {
+        console.log("invoked linkValidity"+isValid);
+        setexpiredLink(isValid);
+        setIsTest(true);
+    }
     const selectedCardPayment = (id: string, billing_details: {
         address: {
             city: string,
@@ -488,21 +536,8 @@ const Payment = () => {
         currencyCode: string
     ) {
         setIsLoader(true);
-        // if (this.urlContactId) {
-        //   this.contactId = this.urlContactId;
-        // } else {
-        //   this.contactId = this.newContactId;
-        // }
-        // if (this.urlmail) {
-        //   this.mail = this.urlmail;
-        // } else {
-        //   this.mail = this.email;
-        // }
-        //var amount = '"'+ this.payingAmount+  '"';
-        //console.log("New amount------>"+amount);
-        //const amount = this.payingAmount;
 
-        console.log("order14"+orderidUrl);
+        console.log("invoked transaction payment" + orderidUrl);
         var transactionParams = {
             paymentGatewayIdentifier: transactionId,
             Amount: payableAmount,
@@ -527,7 +562,7 @@ const Payment = () => {
         var url = baseUrl +
             "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=POST&inputParams=" +
             JSON.stringify(transactionParams);
-        console.log("this.final transaction url --->" + url);
+        console.log("this.final transaction url payment --->" + url);
         fetch(url, {
             method: "GET",
             headers: {
@@ -654,15 +689,15 @@ const Payment = () => {
                                         <div className="col-md-8 ps-0 ">
                                             <p className="ps-3 textmuted fw-bold h6 mb-0">TOTAL AMOUNT</p>
                                             <p className="h1 fw-bold d-flex"> <span
-                                                className=" fas fa-dollar-sign textmuted pe-1 h6 align-text-top mt-1"></span>{numberFormat(orderTotal)}
+                                                className=" fas fa-dollar-sign textmuted pe-1 h6 align-text-top mt-1"></span>{numberFormat(dueAmount)}
                                                 {/* <span className="textmuted">.58</span> */}
                                             </p>
                                             {/* <p className="ms-3 px-2 bg-green">+10% since last month</p> */}
                                         </div>
                                         <div className="col-md-4">
-                                            <p className="p-org"> <span className="fas fa-circle pe-2"></span>Due amount </p>
+                                            {/* <p className="p-org"> <span className="fas fa-circle pe-2"></span>Due amount </p>
                                             <p className="fw-bold mb-3">{numberFormat(dueAmount)}
-                                            </p>
+                                            </p> */}
                                             {/* <p className="p-blue"><span className="fas fa-circle pe-2"></span>Amount Paid</p>
                                         <p className="fw-bold">{numberFormat(paidAmount)}
                                         </p> */}
@@ -708,7 +743,7 @@ const Payment = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {showBillingDetails ?
+                                {/* {showBillingDetails ?
                                     <div className="col-12 px-0">
                                         <div className="box-right card-bg-img">
                                             <div className="d-flex mb-2">
@@ -720,7 +755,7 @@ const Payment = () => {
                                                 <p className="h7 "><span>{billingState}</span> ,<span> {billingCountry} </span> <span> {billingPostalcode}</span></p>
                                             </div>
                                         </div>
-                                    </div> : ''}
+                                    </div> : ''} */}
                             </div>
                         </div>
                         <div className="col-md-5 col-12 ps-md-5 p-0 ">
@@ -748,8 +783,13 @@ const Payment = () => {
                                                             setPaymentSelected(false);
                                                             setRadioValue(e.currentTarget.value); if (e.currentTarget.value === 'card') {
                                                                 setShowCard(true);
-                                                                setShowAch(false);
-                                                            } else { setShowAch(true); setShowCard(false); }
+                                                                setShowWiretransfer(false)
+                                                                //setShowAch(false);
+                                                            } else {
+                                                                //setShowAch(true); 
+                                                                setShowWiretransfer(true)
+                                                                setShowCard(false);
+                                                            }
                                                         }}
                                                     >
                                                         {radio.name}
@@ -758,80 +798,98 @@ const Payment = () => {
                                             </ButtonGroup>
                                         </div>
                                     </div>
-                                    <p className="textmuted h8 mb-0">Please choose any payment method to continue</p>
-                                    <div className="">
+                                    {showCard || showAch ? <p className="textmuted h8 mb-0">Please choose any payment method to continue</p> : <p className="textmuted h8 mb-0">Select the payment method for placing a temporary hold until the wire transfer has been completed</p>}
+                                    {/* <div className="">
                                         {showAch ? <Plaid apicustomerid={apicustomerId} selectedBankPayment={selectedBankPayment} /> : null}
+                                    </div> */}
+                                    <div className="">
+                                        {showWiretransfer ? <WireTransfer
+                                            apicustomerid={apicustomerId}
+                                            selectedCardPayment={selectedCardPayment}
+                                            oppId={oppId}
+                                            quoteId={quoteId}
+                                            orderId={orderId}
+                                            mailId={mailId}
+                                            contId={contId}
+                                            linkId={linkId}
+                                            dueAmount={dueAmount}
+                                            baseUrlValue={baseUrlValue}
+                                            reqNumber={reqNumber}
+                                            linkValidity={linkValidity} 
+                                        /> : null}
                                     </div>
                                     <div className="">
                                         {showCard ? <Stripe apicustomerid={apicustomerId} selectedCardPayment={selectedCardPayment} /> : null}
                                     </div>
-                                    {showCard || showAch ? null : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center mb-3"><Placeholder className="w-100 h9" animation="glow">
+                                    {showCard || showAch || showWiretransfer ? null : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center mb-3"><Placeholder className="w-100 h9" animation="glow">
                                         <Placeholder xs={7} /> <Placeholder xs={4} /> <Placeholder xs={4} />{' '}
                                         <Placeholder xs={6} /> <Placeholder xs={8} />
                                     </Placeholder></div>}
                                 </div>
-                                <div className='mb-2'>
-                                    <form className="list-group">
-                                        <label className="list-group-item">
-                                            <div className="row">
-                                                <div className='col-1 py-2'>
-                                                    <input type="radio" className="me-3" id="default" name="Default-Payment" value="default" checked={selectedPaymentOption === 'default'} onChange={(e) => {
-                                                        setPayType(e.target.value)
-                                                    }} disabled={!paymentSelected} /></div>
-                                                <div className='col-5 py-2'>
-                                                    Total amount due
+                                {showCard || showAch ? <div>
+                                    <div className='mb-2'>
+                                        <form className="list-group">
+                                            <label className="list-group-item">
+                                                <div className="row">
+                                                    <div className='col-1 py-2'>
+                                                        <input type="radio" className="me-3" id="default" name="Default-Payment" value="default" checked={selectedPaymentOption === 'default'} onChange={(e) => {
+                                                            setPayType(e.target.value)
+                                                        }} disabled={!paymentSelected} /></div>
+                                                    <div className='col-5 py-2'>
+                                                        Total amount due
+                                                    </div>
+                                                    <div className='col-6 py-2 text-end'>
+                                                        {numberFormat(dueAmount)}
+                                                    </div>
                                                 </div>
-                                                <div className='col-6 py-2 text-end'>
-                                                    {numberFormat(dueAmount)}
+                                            </label>
+                                            <label className="list-group-item">
+                                                <div className="row">
+                                                    <div className='col-1 py-2'>
+                                                        <input type="radio" className="me-3" id="other-payment" name="other-payment" value="other-payment" checked={selectedPaymentOption === 'other-payment'} onChange={(e) => {
+                                                            setPayType(e.target.value); setPayableAmount(''); setTotalAmount(''); setChargeAmount('');
+                                                        }} disabled={!paymentSelected} /></div>
+                                                    <div className='col-5 py-2'>
+                                                        Other amount
+                                                    </div>
+                                                    <div className='col-6 text-end'>
+                                                        {showOtherAmoutTextField ?
+                                                            <div className="input-group">
+                                                                <span className="input-group-text">$</span>
+                                                                <input type="text" className="form-control border-end-0 text-end pe-0" aria-label="Amount (to the nearest dollar)" onKeyUp={(e) => {
+                                                                    setPayableAmount(e.currentTarget.value);
+                                                                }} />
+                                                                <span className="input-group-text bg-transparent ps-0">.00</span>
+                                                            </div> : null}
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <div className="h8">
+                                            <div className="row m-0 border-bottom mb-3">
+                                                <div className="col-8 h8 pe-0 ps-2">
+                                                    <span className="d-block py-2">Payment Charge</span>
+                                                </div>
+                                                <div className="col-4 p-0 pe-2 text-end">
+                                                    <span className="d-block py-2">{numberFormat(chargeAmount)}</span>
                                                 </div>
                                             </div>
-                                        </label>
-                                        <label className="list-group-item">
-                                            <div className="row">
-                                                <div className='col-1 py-2'>
-                                                    <input type="radio" className="me-3" id="other-payment" name="other-payment" value="other-payment" checked={selectedPaymentOption === 'other-payment'} onChange={(e) => {
-                                                        setPayType(e.target.value); setPayableAmount(''); setTotalAmount(''); setChargeAmount('');
-                                                    }} disabled={!paymentSelected} /></div>
-                                                <div className='col-5 py-2'>
-                                                    Other amount
-                                                </div>
-                                                <div className='col-6 text-end'>
-                                                    {showOtherAmoutTextField ?
-                                                        <div className="input-group">
-                                                            <span className="input-group-text">$</span>
-                                                            <input type="text" className="form-control border-end-0 text-end pe-0" aria-label="Amount (to the nearest dollar)" onKeyUp={(e) => {
-                                                                setPayableAmount(e.currentTarget.value);
-                                                            }} />
-                                                            <span className="input-group-text bg-transparent ps-0">.00</span>
-                                                        </div> : null}
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </form>
-                                </div>
-                                <div>
-                                    <div className="h8">
-                                        <div className="row m-0 border-bottom mb-3">
-                                            <div className="col-8 h8 pe-0 ps-2">
-                                                <span className="d-block py-2">Payment Charge</span>
-                                            </div>
-                                            <div className="col-4 p-0 pe-2 text-end">
-                                                <span className="d-block py-2">{numberFormat(chargeAmount)}</span>
-                                            </div>
-                                        </div>
 
-                                        <div className="d-flex h7 mb-2 px-2">
-                                            <p className="">Total Amount</p>
-                                            <p className="ms-auto"> <span className='fw-bold'>{numberFormat(totalAmount)}</span></p>
-                                        </div>
-                                        <div className="h8 mb-4">
-                                            <Form.Check aria-label="option 1" label='I agree to the Terms of Service and Privacy Policy' onChange={(e) => { setAcceptCondition(e.target.checked) }} disabled={!paymentSelected} />
+                                            <div className="d-flex h7 mb-2 px-2">
+                                                <p className="">Total Amount</p>
+                                                <p className="ms-auto"> <span className='fw-bold'>{numberFormat(totalAmount)}</span></p>
+                                            </div>
+                                            <div className="h8 mb-4">
+                                                <Form.Check aria-label="option 1" label='I agree to the Terms of Service and Privacy Policy' onChange={(e) => { setAcceptCondition(e.target.checked) }} disabled={!paymentSelected} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <button className="btn btn-primary d-block h8 w-100" onClick={makepayment} disabled={!acceptCondition}>PAY NOW
-                                </button>
+                                    <button className="btn btn-primary d-block h8 w-100" onClick={makepayment} disabled={!acceptCondition}>PAY NOW
+                                    </button>
+                                </div> : null}
                             </div>
                         </div>
                     </div>
