@@ -118,6 +118,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
   const [balAmount, setBalAmount] = useState<string | null>(null);
   const [holdAmount, setHoldAmount] = useState<string | null>(null);
   const [balAmountText, setBalAmountText] = React.useState(false);
+  const [completePayment, setCompletePayment] = React.useState(false);
   const [accordianBody, setAccordianBody] = React.useState(false);
   const [pageValidity, setPageValidity] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState(false);
@@ -176,10 +177,14 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       //setBalAmount(props.dueAmount);
       //setReqNumber(props.reqNumber);
     }
+    if(completePayment){
+      console.log("setting hold button-->");
+      setHoldButton(false);
+    }
     const current = new Date();
     setTodaysDate(`${current.getFullYear()}-${current.getMonth() + 1
       }-${current.getDate()}`);
-  }, [payLink, transactionId, payMethodId, transId, transList, baseUrlValue, payableAmount])
+  }, [payLink, transactionId, payMethodId, transId, transList, baseUrlValue, payableAmount,completePayment])
   const showDropdown = (id: string) => {
     console.log("myContainer.. in showDropdown ", cradListContainer.current);
     handleShowAmountCard();
@@ -266,6 +271,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
     else {
       checkWireTransfer();
       setBalAmountText(false);
+      setCompletePayment(true);
     }
     setBalAmount(JSON.stringify(amountbal));
     console.log("xxxxx-->" + amountbal);

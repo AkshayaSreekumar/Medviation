@@ -242,7 +242,7 @@ export default function CardForm(props: CardFormProps) {
                 className="form-control mb-3"
                 autoComplete="off"
                 name="addrressline2"
-                placeholder='Addres Line 2(Optional)'
+                placeholder='Addres Line 2'
                 value={selectedCreditCard.addrressline2}
                 onChange={handleFormChange}
                 isInvalid={!!errors.addrressline2}
