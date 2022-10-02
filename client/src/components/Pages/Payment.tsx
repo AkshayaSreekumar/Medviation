@@ -30,6 +30,8 @@ interface childparams {
     dueAmount: string | null;
     baseUrlValue: string | null;
     reqNumber: string | null;
+    stripeValue: string | null;
+    navigateValue: string | null;
 }
 const Payment = () => {
     const [isLoader, setIsLoader] = React.useState(true);
@@ -86,6 +88,8 @@ const Payment = () => {
     const [quoteId, setQuoteId] = useState<string | null>(null);
     const [oppId, setOppId] = useState<string | null>(null);
     const [linkId, setLinkId] = useState<string | null>(null);
+    const [stripeValue, setStripeValue] = useState<string | null>(null);
+    const [navigateValue, setNavigateValue] = useState<string | null>(null);
     const [baseUrlValue, setBaseUrlValue] = useState<string | null>(null);
     const [reqNumber, setReqNumber] = useState<string | null>(null);
     const [oppName, setOppName] = useState<string | null>(null);
@@ -93,7 +97,9 @@ const Payment = () => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const urlPaymentLinkId = urlParams.get('Id')
-
+    const [stripeKey, setStripeKey] = useState<string | null>(null);
+    const [brandLogo, setbrandLogo] = useState<string | null>(null);
+    const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
     const [radioValue, setRadioValue] = useState('card');
 
     const radios = [
@@ -113,6 +119,7 @@ const Payment = () => {
         }
         if (!idempotencyKey) {
             createRandomKey();
+           // getStripeKey();
         }
         if (!apicustomerId) {
             getPaymentLinkDetails();
@@ -139,13 +146,14 @@ const Payment = () => {
             setChargeAmount(JSON.stringify(chargeAmd))
             setTotalAmount(JSON.stringify(parseInt(payableAmount) + chargeAmd));
         }
-        if (radioValue === 'card' && apicustomerId) {
+        if (radioValue === 'card' && apicustomerId && stripeValue) {
+            console.log("setcard true"+stripeValue);
             setShowCard(true);
         }
         if(dueAmount){
             setAmountParam(dueAmount);
         }
-        if(urlContactId && urlmail && orderidUrl && orderOpportunity && orderQuote && urlPaymentLinkId && dueAmount && baseUrl && oppName){
+        if(urlContactId && urlmail && orderidUrl && orderOpportunity && orderQuote && urlPaymentLinkId && dueAmount && baseUrl && oppName && stripeKey && redirectUrl){
             setContId(urlContactId);
             setMailId(urlmail);
             setOrderId(orderidUrl);
@@ -155,13 +163,10 @@ const Payment = () => {
             setDueAmount(dueAmount);
             setBaseUrlValue(baseUrl);
             setReqNumber(oppName);
+            setStripeValue(stripeKey);
+            setNavigateValue(redirectUrl);
         }
-        // if(urlContactId){setContId(urlContactId);}
-        // if(urlmail){setMailId(urlmail);}
-        // if(orderidUrl){setOrderId(orderidUrl);}
-        // if(orderOpportunity){setOppId(orderOpportunity);}
-        // if(orderQuote){setQuoteId(orderQuote);}
-    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType, radioValue, urlContactId, baseUrl, idempotencyKey, orderidUrl, transResponse])
+    }, [apicustomerId, dueAmount, orderTotal, selectedPaymentOption, payableAmount, cardType, radioValue, urlContactId, baseUrl, idempotencyKey, orderidUrl, transResponse,stripeValue])
 
     const createRandomKey = () => {
         var key = "";
@@ -278,17 +283,51 @@ const Payment = () => {
                 // if (y[0].AmountDue__c) {
                 //     setDueAmount(y[0].AmountDue__c);
                 // }
-                console.log("beforeorder" + order);
+                console.log("beforeorde--->r" +baseUrl);
                 //getOrderDetails(urlOrderId, baseUrl);
                 getOrderDetails(order, baseUrl);
                 getFieldsetData();
-                //getStripeKey();
+                getStripeKey(baseUrl);
             })
             .catch((err) => {
                 console.log("err" + err);
             })
     }
-
+   const getStripeKey = (baseUrl:string) =>{
+        console.log("Invoked stripe key"+baseUrl);
+        // var url =
+        // baseUrl +
+        //   "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams={}";
+        var url = baseUrl + "InteractPay/services/apexrest/crma_pay/InterACTPayAuthorizationUpdated/?methodType=GET&inputParams={}";
+       console.log("stripe url-->" + url);
+       fetch(url, {
+        method: "GET",
+        headers: {
+            mode: "cors",
+            "Access-Control-Allow-Origin": "*",
+        },
+    })
+          .then((response) => response.text())
+          .then((response) => {
+            // console.log(" Stripe key  -->" + JSON.stringify(response));
+            // this.stripeKey = response;
+            response = response.slice(1, response.length - 1);
+            console.log("RESponse    ------>", response);
+            var mdt_Reponse = JSON.parse(response);
+            var orderReponse = JSON.stringify(JSON.parse(response));
+            console.log("stripekeyyy--->"+mdt_Reponse.StripeKey);
+            setStripeKey(mdt_Reponse.StripeKey);
+            setbrandLogo(mdt_Reponse.BrandLogo);
+            setRedirectUrl( mdt_Reponse.transactionRedirectUrl);
+           // this.failedUrl = mdt_Reponse.transactionFailedUrl;
+            //console.log("failedurl-->"+this.failedUrl);
+            //this.setState({ brandLogo: this.brandLogo });
+            //console.log("this.brandLogo--->" + this.brandLogo);
+          })
+          .catch((err) => {
+            console.log("err" + err);
+          })
+      }
     const getFieldsetData = () => {
         console.log("Invoked getFieldsetData7" + urlPaymentLinkId);
         var ipParams = { inputId: urlPaymentLinkId };
@@ -362,8 +401,7 @@ const Payment = () => {
                 method: "POST",
                 headers: {
                     "x-rapidapi-host": "https://api.stripe.com",
-                    Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
-                },
+                    Authorization: " Bearer " +stripeKey,                },
             }
         )
             .then((response) => response.json())
@@ -496,12 +534,13 @@ const Payment = () => {
     }
 
     async function makepayment() {
+        console.log("invoked mkepayment--->"+stripeKey);
         setIsLoader(true);
         fetch(paymentUrl + '&amount=' + totalAmount, {
             method: "POST",
             headers: {
                 "x-rapidapi-host": "https://api.stripe.com",
-                Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+                Authorization: " Bearer " +stripeKey,
                 "Idempotency-Key": idempotencyKey,
             },
         })
@@ -605,9 +644,10 @@ const Payment = () => {
                 // Med Sandbox
                 //var redirectUrl = 'https://developer-medviation.cs214.force.com/xchng/s/invoice-page'+'?transId=' + response;
                 //Med Dev
-                var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page' + '?transId=' + response;
-                console.log("redirecturl-->" + redirectUrl);
-                navigateTo(redirectUrl);
+                //var redirectUrl = 'https://medviation-developer-edition.na213.force.com/s/invoice-page' + '?transId=' + response;
+                var navigateUrl = redirectUrl + '?transId=' + response;
+                console.log("redirecturl-->" + navigateUrl);
+                navigateTo(navigateUrl);
             })
             .catch((err) => {
                 setIsLoader(false);
@@ -816,10 +856,12 @@ const Payment = () => {
                                             baseUrlValue={baseUrlValue}
                                             reqNumber={reqNumber}
                                             linkValidity={linkValidity} 
+                                            stripeValue={stripeValue}
+                                            navigateValue={navigateValue}
                                         /> : null}
                                     </div>
                                     <div className="">
-                                        {showCard ? <Stripe apicustomerid={apicustomerId} selectedCardPayment={selectedCardPayment} /> : null}
+                                        {showCard ? <Stripe apicustomerid={apicustomerId} selectedCardPayment={selectedCardPayment} stripeValue={stripeValue} /> : null}
                                     </div>
                                     {showCard || showAch || showWiretransfer ? null : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center mb-3"><Placeholder className="w-100 h9" animation="glow">
                                         <Placeholder xs={7} /> <Placeholder xs={4} /> <Placeholder xs={4} />{' '}

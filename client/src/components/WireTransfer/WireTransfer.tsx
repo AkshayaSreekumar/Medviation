@@ -51,6 +51,8 @@ interface cardDataformat {
     dueAmount: string | null;
     baseUrlValue: string | null;
     reqNumber: string | null;
+    stripeValue: string | null;
+    redirectUrl: string | null;
   //linkValidity: string;
 }
 
@@ -73,23 +75,19 @@ const Stripe = (props: any) => {
   const [dueAmount, setDueAmount] = useState<string | null>(null);
   const [baseUrlValue, setBaseUrlValue] = useState<string | null>(null);
   const [reqNumber, setReqNumber] = useState<string | null>(null);
-  // const [expiredLink, setExpiredLink] = React.useState(false);
-  // const [childData, setChildData] = useState({
-  //   name: 'unknown',
-  //   age: 'unknown'
-  // });
-  // const passData = (data) => {
-  //   setChildData(data);
-  // };
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [stripeKey, setStripeKey] = useState<string | null>(null);
+  
 
   useEffect(() => {
     //let x= env.PLAID_CLIENT_ID;
     console.log("props.apicustomerid" + props.apicustomerid);
+    if(stripeKey){
     loadCardData(props.apicustomerid);
     setCustomerId(props.apicustomerid);
-    //let y = props.vary;
+    }
     console.log("useeffect-->quoteId"+props.quoteId);
-    if(props.oppId && props.quoteId && props.orderId && props.mailId && props.contId && props.linkId && props.dueAmount && props.baseUrlValue && props.reqNumber){
+    if(props.oppId && props.quoteId && props.orderId && props.mailId && props.contId && props.linkId && props.dueAmount && props.baseUrlValue && props.reqNumber &&  props.stripeValue &&  props.navigateValue){
       setOppId(props.oppId);
     setQuoteId(props.quoteId);
     setOrderId(props.orderId);
@@ -99,21 +97,24 @@ const Stripe = (props: any) => {
     setDueAmount(props.dueAmount);
     setBaseUrlValue(props.baseUrlValue);
     setReqNumber(props.reqNumber);
+    setStripeKey(props.stripeValue);
+    setRedirectUrl(props.navigateValue);
     }
     
     console.log("order- details in transaction->"+orderId+"email-->"+mailId+"contact-->"+contId+"quote-->"+quoteId+"opport-->"+oppId);
-  }, []);
+  }, [stripeKey]);
 
   const loadCardData = (cusId: string) => {
-    console.log("invoked Card()!!!!");
+    console.log("invoked Card()!!!!"+stripeKey);
     fetch(
       "https://api.stripe.com/v1/payment_methods?type=card&customer=" + cusId,
       {
         method: "GET",
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
-          Authorization:
-            " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          // Authorization:
+          //   " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          Authorization: " Bearer " +stripeKey,
         },
       }
     )
@@ -165,7 +166,8 @@ const Stripe = (props: any) => {
       method: "POST",
       headers: {
         "x-rapidapi-host": "https://api.stripe.com",
-        Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        //Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        Authorization: " Bearer " +stripeKey,
       },
     })
       .then((response) => response.json())
@@ -195,7 +197,8 @@ const Stripe = (props: any) => {
       method: "POST",
       headers: {
         "x-rapidapi-host": "https://api.stripe.com",
-        Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        //Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        Authorization: " Bearer " +stripeKey,
       },
     })
       .then((response) => response.json())
@@ -238,38 +241,6 @@ const Stripe = (props: any) => {
     //setCustomerId(props.apicustomerid);
     setIsLoader(false);
   }
-  async function createHold() {
-    // setIsLoader(true);
-    // fetch(paymentUrl + '&amount=' + totalAmount, {
-    //     method: "POST",
-    //     headers: {
-    //         "x-rapidapi-host": "https://api.stripe.com",
-    //         Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
-    //         "Idempotency-Key": idempotencyKey,
-    //     },
-    // })
-    //     .then((response) => response.json())
-    //     .then((response) => {
-    //         console.log(JSON.stringify('PaymentReaponse' + response));
-    //         let transactionId = response.id;
-    //         let transactionstatus = response.status;
-    //         let gatewayMessage = JSON.parse(
-    //             JSON.stringify(response.charges.data[0].outcome.seller_message)
-    //         );
-    //         let gatewayStatus = JSON.parse(
-    //             JSON.stringify(response.charges.data[0].outcome.network_status)
-    //         );
-    //         let currencyCode = response.currency;
-    //         var localKey = localStorage.getItem('RandomKey');
-    //         setIsLoader(false);
-    //         if (localKey !== idempotencyKey) {
-    //             createTransactionRecord(transactionId, transactionstatus, gatewayMessage, gatewayStatus, currencyCode);
-    //         }
-    //     })
-    //     .catch((err) => {
-    //         console.log(err);
-    //     });
-}
   return (
     <>
       {isLoader ? <Spinner /> : null}
@@ -295,6 +266,8 @@ const Stripe = (props: any) => {
         dueAmount={dueAmount}
         baseUrlValue={baseUrlValue}
         reqNumber={reqNumber}
+        stripeKey={stripeKey}
+        redirectUrl={redirectUrl}
        //linkValidity={linkId}
        />
         : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center"><Placeholder className="w-100 h9" animation="glow">

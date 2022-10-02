@@ -37,7 +37,7 @@ const StripeAccList: React.FC<AccInterface> = (props) => {
                 method: "POST",
                 headers: {
                     "x-rapidapi-host": "https://api.stripe.com",
-                    Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+                    //Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
 
                 },
             }
@@ -55,56 +55,59 @@ const StripeAccList: React.FC<AccInterface> = (props) => {
             });
 
     }
-    return (<div className='acc-list'>
-        <Alert alert={alert} setAlert={setAlert} />
-        {
+    return (
+     //   <div className='acc-list'>
+    //     <Alert alert={alert} setAlert={setAlert} />
+    //     {
 
-            props.accountlist.map(acc => {
-                return <label key={acc.id}>
-                    <input type="radio" name="demo" className="card-input-element d-none" id={acc.id} onChange={props.selectedAccount.bind(null, acc.id)} />
-                    <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center">
-                        <div className='row w-100'>
-                            <div className='col-2'>
-                                <i className="fa fa-university text-black-50 fs-1 " aria-hidden="true"></i>
-                            </div>
-                            <div className='col-10'>
-                                <p className='h7 mb-1'>{acc.bank_name}  <span className="ms-3 px-2 bg-green ccNumber position-relative">{acc.status}</span></p>
-                                <p className='fw-bold h8 mb-0'>XXXXXXXX{acc.last4}</p>
-                                <div className='carActionBtn'>
-                                    <Dropdown>
-                                        <Dropdown.Toggle variant="light" className='text-muted bg-white dropdown-toggle-custom-' size='lg' id="dropdown-basic">
-                                        </Dropdown.Toggle>
+    //         props.accountlist.map(acc => {
+    //             return <label key={acc.id}>
+    //                 <input type="radio" name="demo" className="card-input-element d-none" id={acc.id} onChange={props.selectedAccount.bind(null, acc.id)} />
+    //                 <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center">
+    //                     <div className='row w-100'>
+    //                         <div className='col-2'>
+    //                             <i className="fa fa-university text-black-50 fs-1 " aria-hidden="true"></i>
+    //                         </div>
+    //                         <div className='col-10'>
+    //                             <p className='h7 mb-1'>{acc.bank_name}  <span className="ms-3 px-2 bg-green ccNumber position-relative">{acc.status}</span></p>
+    //                             <p className='fw-bold h8 mb-0'>XXXXXXXX{acc.last4}</p>
+    //                             <div className='carActionBtn'>
+    //                                 <Dropdown>
+    //                                     <Dropdown.Toggle variant="light" className='text-muted bg-white dropdown-toggle-custom-' size='lg' id="dropdown-basic">
+    //                                     </Dropdown.Toggle>
 
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item >Edit</Dropdown.Item>
-                                            <Dropdown.Item onClick={deletePaymentMethod.bind(null, acc.id)}>Delete</Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </label>
+    //                                     <Dropdown.Menu>
+    //                                         <Dropdown.Item >Edit</Dropdown.Item>
+    //                                         <Dropdown.Item onClick={deletePaymentMethod.bind(null, acc.id)}>Delete</Dropdown.Item>
+    //                                     </Dropdown.Menu>
+    //                                 </Dropdown>
+    //                             </div>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             </label>
 
-            })
+    //         })
 
-        }
-        <Modal show={show} onHide={handleClose} centered>
-            <Modal.Header >
-                <Modal.Title className='fw-bold h6'><i className="fa fa-exclamation-triangle text-warning me-3" aria-hidden="true"></i>Remove</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>The payment method will no longer be usable for you !.</Modal.Body>
-            <Modal.Footer className='pt-0 border-top-0'>
-                <Button variant="secondary" size="sm" onClick={handleClose}>
-                    Close
-                </Button>
-                <Button variant="danger" size="sm" onClick={ConfirmDelete}>
-                    Remove
-                </Button>
-            </Modal.Footer>
-        </Modal>
+    //     }
+    //     <Modal show={show} onHide={handleClose} centered>
+    //         <Modal.Header >
+    //             <Modal.Title className='fw-bold h6'><i className="fa fa-exclamation-triangle text-warning me-3" aria-hidden="true"></i>Remove</Modal.Title>
+    //         </Modal.Header>
+    //         <Modal.Body>The payment method will no longer be usable for you !.</Modal.Body>
+    //         <Modal.Footer className='pt-0 border-top-0'>
+    //             <Button variant="secondary" size="sm" onClick={handleClose}>
+    //                 Close
+    //             </Button>
+    //             <Button variant="danger" size="sm" onClick={ConfirmDelete}>
+    //                 Remove
+    //             </Button>
+    //         </Modal.Footer>
+    //     </Modal>
 
-    </div>);
+    // </div>
+    <div>hello</div>
+    );
 
 }
 

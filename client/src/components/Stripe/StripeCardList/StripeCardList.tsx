@@ -36,17 +36,24 @@ interface AccInterface {
     brand: string
   }) => void;
   refreshComponent: () => void;
+  stripeKey: string | null;
 }
 const StripeCardList: React.FC<AccInterface> = (props) => {
   const [alert, setAlert] = useState({});
   const [show, setShow] = useState(false);
   const [action, setAction] = useState(false);
   const [deleteCardId, setDeleteCardId] = useState<string | null>(null);
-
+  const [stripeKey, setStripeKey] = useState<string | null>(null);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   const cradListContainer = useRef(null);
+
+  useEffect(() => {
+    if(props.stripeKey){
+        setStripeKey(props.stripeKey);
+    }
+  }, []);
 
   function refreshCardList() {
     props.refreshComponent();
@@ -58,14 +65,15 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
     handleShow();
   }
   function ConfirmDelete() {
+    console.log("invoked delete"+stripeKey);
     var deleteUrl = "https://api.stripe.com/v1/payment_methods/" + deleteCardId + "/detach";
     fetch(deleteUrl,
       {
         method: "POST",
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
-          Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
-
+          //Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          Authorization: " Bearer " +stripeKey,
         },
       }
     )
@@ -85,7 +93,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
   function showCardActions() {
     setAction(true);
   }
-  console.log("StripeAccountList" + JSON.stringify(props.cardList))
+  //console.log("StripeAccountList" + JSON.stringify(props.cardList))
   return (<div className='acc-list'>
     <Alert alert={alert} setAlert={setAlert} />
     {

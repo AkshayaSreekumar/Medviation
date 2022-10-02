@@ -50,6 +50,8 @@ interface AccInterface {
   dueAmount: string | null;
   baseUrlValue: string | null;
   reqNumber: string | null;
+  stripeKey: string | null;
+  redirectUrl: string | null;
   // linkValidity: string;
 }
 const StripeCardList: React.FC<AccInterface> = (props) => {
@@ -71,6 +73,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
 
     setHoldShow(false);
     setAccordianBody(false);
+    //setInputValue(' ');
     setHoldButton(false);
   };
   const handleHoldShow = () => {
@@ -111,11 +114,14 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
   const [mailId, setMailId] = useState<string | null>(null);
   const [contId, setContId] = useState<string | null>(null);
   const [linkId, setLinkId] = useState<string | null>(null);
+  const [stripeKey, setStripeKey] = useState<string | null>(null);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   //const [linkValidity, setLinkValidity] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [dueAmount, setDueAmount] = useState<string | null>(null);
   const [baseUrlValue, setBaseUrlValue] = useState<string | null>(null);
   const [balAmount, setBalAmount] = useState<string | null>(null);
+  const [enteredAmount, setEnteredAmount] = useState<string | null>(null);
   const [holdAmount, setHoldAmount] = useState<string | null>(null);
   const [balAmountText, setBalAmountText] = React.useState(false);
   const [completePayment, setCompletePayment] = React.useState(false);
@@ -125,8 +131,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
   const [reqNumber, setReqNumber] = useState<string | null>(null);
   const [oppNumber, setOppNumber] = useState<string>();
   const [expiredLink, setExpiredLink] = React.useState(false);
-  //const transArray[any];
-  //const [transList, setTransList] = useState([]);
+  //const [inputValue, setInputValue] = useState<string | null>(null);
   const [transList, setTransList] = useState<string[]>([]);
   const [transId, setTransId] = useState<string | null>(null);
   // const items = [];
@@ -145,9 +150,27 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
     if (baseUrlValue) {
       getWireTransferDetails();
     }
-    // if (payableAmount) {
-    //   amountValidation();
-    // }
+    if (payableAmount) {
+     // amountValidation();
+      if (balAmount) {
+        console.log("if balAmount"+balAmount);
+        console.log("if balAmount payableAmount"+payableAmount);
+       // if (Number(balAmount) < Number(payableAmount)) {
+        if (Number(balAmount) < Number(enteredAmount)) {
+          console.log("if balamount");
+          setErrorMessage(true);
+          setHoldButton(false);
+        } else { setErrorMessage(false); }
+      }
+      else if (totalAmount) {
+        console.log("if totalAmount");
+        // if (Number(totalAmount) < Number(payableAmount)) {
+          if (Number(totalAmount) < Number(enteredAmount)) {
+          setErrorMessage(true);
+          setHoldButton(false);
+        } else { setErrorMessage(false); }
+      }
+    }
     if (transactionId && payMethodId) {
       console.log("invokeed confirm hold from use effeect"+payMethodId);
       confirmHold(transactionId, payMethodId);
@@ -160,8 +183,9 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       //localStorage.setItem('Transactionlist', JSON.stringify(transList));
       //console.log("get local storage item"+JSON.parse(localStorage.Transactionlist("names")));
     }
-    if (props.oppId && props.quoteId && props.orderId && props.mailId && props.contId && props.linkId && props.customerId && props.dueAmount && props.baseUrlValue && props.reqNumber) {
-      console.log("invoke mailId,mailId mailId in use effect" + props.baseUrlValue);
+    if (props.oppId && props.quoteId && props.orderId && props.mailId && props.contId && props.linkId && props.customerId && props.dueAmount && props.baseUrlValue && props.reqNumber && props.stripeKey && props.redirectUrl) {
+      console.log("invoke wire-stripeKey" + props.stripeKey);
+      console.log("invoke wire-redirectUrl" + props.redirectUrl);
       setOppId(props.oppId);
       setQuoteId(props.quoteId);
       setOrderId(props.orderId);
@@ -169,13 +193,18 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       setContId(props.contId);
       setLinkId(props.linkId);
       setCustomerId(props.customerId);
-      //setDueAmount(props.dueAmount);
+      setStripeKey(props.stripeKey);
+      setRedirectUrl(props.redirectUrl);
+      if( localStorage.getItem('localBalAmmount')){
+        setTotalAmount(localStorage.getItem('localBalAmmount'));
+        setBalAmountText(true);
+        setBalAmount(localStorage.getItem('localBalAmmount'));
+      }else{
       setTotalAmount(props.dueAmount);
+      }
       setBaseUrlValue(props.baseUrlValue);
       let oppNum = String(props.reqNumber);
       setOppNumber(oppNum);
-      //setBalAmount(props.dueAmount);
-      //setReqNumber(props.reqNumber);
     }
     if(completePayment){
       console.log("setting hold button-->");
@@ -201,8 +230,8 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
         method: "POST",
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
-          Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
-
+         // Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          Authorization: " Bearer " +stripeKey,
         },
       }
     )
@@ -246,12 +275,16 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
     updatePaymentLinkRecord();
   }
   function showAccordianBody() {
-    console.log("invoked wiretransferInstructions");
+    console.log("invoked showAccordianBody");
     setAccordianBody(true);
   }
   const createHold = (id: string) => {
     console.log("invoked create hold method"+payMethodId);
-    setErrorMessage(false);
+    if(errorMessage){
+      setErrorMessage(false);
+    }
+   // setErrorMessage(false);
+   setEnteredAmount('0');
     setIsLoader(true);
     console.log("payableAmount" + payableAmount);
     setPayMethodId(id);
@@ -269,19 +302,21 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       setBalAmountText(true);
     }
     else {
+      localStorage.removeItem('localBalAmmount');
       checkWireTransfer();
       setBalAmountText(false);
       setCompletePayment(true);
     }
     setBalAmount(JSON.stringify(amountbal));
+     localStorage.setItem('localBalAmmount', JSON.stringify(amountbal));
     console.log("xxxxx-->" + amountbal);
     fetch('https://api.stripe.com/v1/payment_intents?amount=' + payableAmount + '00&currency=usd&payment_method_types[]=card&capture_method=manual&payment_method=' + id + '&customer=' + customerId
       , {
         method: "POST",
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
-          Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
-
+          //Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          Authorization: " Bearer " +stripeKey,
         },
       })
       .then((response) => response.json())
@@ -301,15 +336,15 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
   }
   function confirmHold(transactionId: string | null, paymentmethodId: string | null) {
     console.log("confirm hold invoked");
-   setErrorMessage(false);
+   //setErrorMessage(false);
     //setIsLoader(true);
     fetch('https://api.stripe.com/v1/payment_intents/' + transactionId + '/confirm?payment_method=' + paymentmethodId
       , {
         method: "POST",
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
-          Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
-          //"Idempotency-Key": idempotencyKey,
+          //Authorization: " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          Authorization: " Bearer " +stripeKey,
         },
       })
       .then((response) => response.json())
@@ -461,6 +496,13 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       .then((response) => response.json())
       .then((response) => {
         console.log(" getWireTransferDetails" + JSON.stringify(response));
+        var x = JSON.stringify(response);
+        //var x = "happy";
+        // var y =  x.slice(
+        //   x.indexOf('Account:') + 1,
+        //   x.lastIndexOf(','),
+        // );
+      //console.log("y--->"+y);
       })
       .catch((err) => {
         console.log("err" + err);
@@ -499,7 +541,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
         console.log("err" + err);
       });
   }
-  console.log("StripeAccountList" + JSON.stringify(props.cardList))
+  //console.log("StripeAccountList---wiretransfer" + JSON.stringify(props.cardList))
   return (<div className='acc-list'>
     {balAmountText ? <p className="textmuted">Your amount due is {numberFormat(balAmount)}</p> : null}
     {isLoader ? <Spinner /> : null}
@@ -509,9 +551,9 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
       props.cardList.map(acc => {
         return (
           <label key={acc.id}>
-            <Accordion  >
-              <Accordion.Item eventKey="0" id={acc.id} onChange={props.selectedCard.bind(null, acc.id, acc.billing_details, acc.card)}>
-                <Accordion.Header onClick={showAccordianBody}>  <div className='col-2 py-1'>
+            <Accordion >
+              <Accordion.Item eventKey="0" id={acc.id} onChange={props.selectedCard.bind(null, acc.id, acc.billing_details, acc.card)} onClick={showAccordianBody}>
+                <Accordion.Header >  <div className='col-2 py-1'>
                   <img
                     src={`/card-type/${acc.card.brand}.svg`}
                     alt="" className='CardListIcon'
@@ -523,7 +565,8 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
                     <div>
                     </div>
                   </div></Accordion.Header>
-                {accordianBody ? <Accordion.Body>
+                {accordianBody ? 
+                <Accordion.Body >
                   <label className="list-group-item">
                     <div className="row">
                       <div className='py-2'>
@@ -534,7 +577,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
                           <span className="input-group-text">$</span>
                           <input type="text" className="form-control border-end-0 text-end pe-0" aria-label="Amount (to the nearest dollar)"
                             onKeyUp={(e) => {
-                              setPayableAmount(e.currentTarget.value); setHoldButton(true);
+                              setPayableAmount(e.currentTarget.value); setEnteredAmount(e.currentTarget.value);setHoldButton(true);
                             }} />
                           <span className="input-group-text bg-transparent ps-0">.00</span>
                         </div>
@@ -557,7 +600,8 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
                     </div> : null}
                     {/*---------------------------------------*/}
                   </label>
-                </Accordion.Body> : null}
+                </Accordion.Body>
+                 : null} 
               </Accordion.Item>
             </Accordion>
           </label>
@@ -589,7 +633,7 @@ const StripeCardList: React.FC<AccInterface> = (props) => {
     <Modal show={holdShow} onHide={handleHoldClose} centered>
       <Modal.Header className='h5 fw-bold'>
         {/* <Modal.Title className='fw-bold hstack'> */}
-        <i className="text-warning me-3" aria-hidden="true"></i> An amount of {numberFormat(holdAmount)} is placed as hold on your credit card
+        <i className="text-warning me-3" aria-hidden="true"></i> An amount of {numberFormat(holdAmount)} is placed as hold on your card
         {/* </Modal.Title> */}
       </Modal.Header>
       <Modal.Body><p className='mx-4'>This amount will be released after a successful completion of wire transfer.</p><p className='mx-4'>Your amount due is {numberFormat(balAmount)}</p>

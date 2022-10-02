@@ -38,6 +38,7 @@ interface cardDataformat {
   }, card: {
     brand: string
   }) => void;
+  stripeKey: string | null;
 }
 
 const Stripe = (props: any) => {
@@ -47,28 +48,36 @@ const Stripe = (props: any) => {
   const [cardList, setCardList] = useState<cardDataformat[]>([]);
   const [isshowAddress, setIsShowAddress] = useState(false);
   const [show, setShow] = useState(false);
+  const [stripeKey, setStripeKey] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("props.apicustomerid" + props.apicustomerid);
-    loadCardData(props.apicustomerid);
-  }, []);
+    console.log("props.apicustomerid in apicustomerid" + props.apicustomerid);
+    console.log("props.apicustomerid in stripeValue" + props.stripeValue);
+    //  loadCardData(props.apicustomerid);
+    if(props.stripeValue){
+        setStripeKey(props.stripeValue);
+    }
+    if(stripeKey){
+      loadCardData(props.apicustomerid);
+    }
+  }, [stripeKey]);
 
   const loadCardData = (cusId: string) => {
-    console.log("invoked Card()!!!!");
+    console.log("invoked  stripeKeyCard()!!!!"+stripeKey);
     fetch(
       "https://api.stripe.com/v1/payment_methods?type=card&customer=" + cusId,
       {
         method: "GET",
         headers: {
           "x-rapidapi-host": "https://api.stripe.com",
-          Authorization:
-            " Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          //Authorization:" Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+          Authorization: " Bearer " +stripeKey,
         },
       }
     )
       .then((response) => response.json())
       .then((response) => {
-        console.log("Card list--------------" + JSON.stringify(response));
+       // console.log("Card list--------------" + JSON.stringify(response));
         setCardList(response.data);
         if (response.data) {
           setPaymentExist(true);
@@ -80,7 +89,7 @@ const Stripe = (props: any) => {
   };
 
   const selectedCard = (id: string, billing_details: {},card:{}) => {
-    console.log(id, billing_details,card);
+    //console.log(id, billing_details,card);
     props.selectedCardPayment(id, billing_details,card)
   };
 
@@ -109,7 +118,8 @@ const Stripe = (props: any) => {
       method: "POST",
       headers: {
         "x-rapidapi-host": "https://api.stripe.com",
-        Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        //Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        Authorization: " Bearer " +stripeKey,
       },
     })
       .then((response) => response.json())
@@ -138,7 +148,8 @@ const Stripe = (props: any) => {
       method: "POST",
       headers: {
         "x-rapidapi-host": "https://api.stripe.com",
-        Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        //Authorization: "Bearer sk_test_51KFJFDEgsgymTP2QQphWcJtpro03YRfRlWeafatGJpjzXkxu8n79rCl10wrGyMz4avPssaWO0lrnsnvxd2gdLVsd00OCD5BLVA",
+        Authorization: " Bearer " +stripeKey,
       },
     })
       .then((response) => response.json())
@@ -184,7 +195,7 @@ const Stripe = (props: any) => {
     <>
       {isLoader ? <Spinner /> : null}
       <Alert alert={alert} setAlert={setAlert}/>
-      {paymentExist ? <StripeCardList cardList={cardList} selectedCard={selectedCard} refreshComponent={refreshComponent} /> : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center"><Placeholder className="w-100 h9" animation="glow">
+      {paymentExist ? <StripeCardList cardList={cardList} selectedCard={selectedCard} refreshComponent={refreshComponent} stripeKey={stripeKey}/> : <div className="card card-body bg-light- d-flex flex-row justify-content-between align-items-center"><Placeholder className="w-100 h9" animation="glow">
         <Placeholder xs={7} /> <Placeholder xs={4} /> <Placeholder xs={4} />{' '}
         <Placeholder xs={6} /> <Placeholder xs={8} />
       </Placeholder></div>}
